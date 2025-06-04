@@ -1,0 +1,43 @@
+[
+	{
+		"type": "desktop",
+		"layout": {
+			"rule": "stretch"
+		},
+		"style": {
+			"background": "#000080" 
+		}
+	}, {
+		"id": "canvas",
+		"type": "div",
+		"layout": {
+			"rule": "stretch"
+		}
+	}, {
+		"type": "div",
+		"layout": {
+			"rule": "stretch-right",
+			"top": 0,
+			"bottom": 0,
+			"right": 0,
+			"width": 176
+		},
+		"style": {
+			"background": "lightgrey"
+		},
+		"children": [
+			{
+				"id": "btn_credits",
+				"type": "button",
+				"text": "Credits",
+				"layout": {
+					"rule": "top-right",
+					"top": 8,
+					"right": 8,
+					"width": 160,
+					"height": 32
+				}
+			}
+		]
+	}
+]
