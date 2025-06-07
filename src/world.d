@@ -55,7 +55,6 @@ void drawPoints(PointsObj obj) {
 	al_identity_transform(&t);
 	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
 	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
-	// al_rotate_transform_3d(&t, 1.0f, 0.0f, 0.0f, obj.rotation); // just to see what the effect is
 	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
 
 	vec3d[] vertBuf = transformVec3d(obj.points, t);
@@ -64,13 +63,11 @@ void drawPoints(PointsObj obj) {
 	}
 }
 
-void drawObject(Object3D obj) {
-
+void drawWireFrame(Object3D obj) {
 	ALLEGRO_TRANSFORM t;
 	al_identity_transform(&t);
 	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
 	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
-	// al_rotate_transform_3d(&t, 1.0f, 0.0f, 0.0f, obj.rotation); // just to see what the effect is
 	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
 
 	vec3d[] vertBuf = transformVec3d(obj.mesh.vertices, t);
@@ -86,6 +83,43 @@ void drawObject(Object3D obj) {
 	}
 }
 
+void drawObject(Object3D obj) {
+
+	ALLEGRO_TRANSFORM t;
+	al_identity_transform(&t);
+	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
+	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
+	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
+
+	vec3d[] vertBuf = transformVec3d(obj.mesh.vertices, t);
+
+	vec3d lightDir = vec3d(0.5, -0.5, 1); // light source direction (downwards)
+
+	for (int i = 0; i < obj.mesh.faces.length; i++) {
+		int[] face = obj.mesh.faces[i];
+		// calculate light from angle of normal vector of face with light source
+		
+		// TODO: move to Mesh/Face
+		vec3d normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);
+		
+		if (normal.z < 0) {
+			continue; // skip back faces
+		}
+
+		// TODO: move normalize function to utility class
+		double light = normal.dotProduct(lightDir) / (normal.length() * lightDir.length());
+		
+		al_draw_filled_triangle(
+			vertBuf[face[0]].x, vertBuf[face[0]].y,
+			vertBuf[face[1]].x, vertBuf[face[1]].y,
+			vertBuf[face[2]].x, vertBuf[face[2]].y,
+			al_map_rgb_f(
+				light, light, light // color based on light intensity
+			)
+		);
+	}
+}
+
 class World : Component {
 
 	Bitmap texture;
@@ -97,14 +131,10 @@ class World : Component {
 		this.initResources();
 
 		this.objects = [
-			// Object3D(generatePyramidMesh(), vec3d(100, 100, 0), vec3d(50, 50, 50), 0.05, window.resources.bitmaps["biotope"]),
-			Object3D(generateCubeMesh(), vec3d(100, 100, 0), vec3d(50, 50, 50), 0.05, window.resources.bitmaps["biotope"]),
 			Object3D(generateFibonacciSpehereMesh(numPoints), vec3d(400, 400, 0), vec3d(200, 200, 200), 0.05, window.resources.bitmaps["biotope"]),
 		];
 
 		this.pointsObj = [
-			PointsObj(generateFibonacciSpherePoints(numPoints), vec3d(400, 400, 0), vec3d(200, 200, 200), 0.05),
-			// PointsObj(generatePyramidMesh().vertices, vec3d(100, 100, 0), vec3d(50, 50, 50), 0.05)
 		];
 	}
 
@@ -126,25 +156,16 @@ class World : Component {
 		al_reset_clipping_rectangle();
 	}
 
-	int numPoints = 32;
+	int numPoints = 512;
 	int dir = 1;
 
 	override void update() {
-		numPoints += dir;
-		if(numPoints >= 200 || numPoints <= 10) {
-			dir *= -1; // Reverse direction when limits are reached
-		}
-
-		this.pointsObj[0].points = generateFibonacciSpherePoints(numPoints);
-		
-		// generating mesh with giftwrap algorithm is too slow beyond ~200 points for an update each frame.
-		this.objects[1].mesh = generateFibonacciSpehereMesh(numPoints);
-
+		// TODO: use animators
 		foreach(ref obj; objects) {
-			obj.rotation += 0.01; // Rotate each object for demonstration
+			obj.rotation += 0.002; // Rotate each object for demonstration
 		}
 		foreach(ref obj; pointsObj) {
-			obj.rotation += 0.01; // Rotate each points object for demonstration
+			obj.rotation += 0.002; // Rotate each points object for demonstration
 		}
 	}
 }
