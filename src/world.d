@@ -8,6 +8,7 @@ import allegro5.allegro;
 import allegro5.allegro_primitives;
 import primitives3d;
 import std.stdio;
+import std.conv;
 import mesh;
 
 struct Object3D {
@@ -83,7 +84,7 @@ void drawWireFrame(Object3D obj) {
 	}
 }
 
-void drawObject(Object3D obj) {
+void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 
 	ALLEGRO_TRANSFORM t;
 	al_identity_transform(&t);
@@ -91,9 +92,21 @@ void drawObject(Object3D obj) {
 	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
 	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
 
+	al_compose_transform(&t, &cameraTransform); // compose with camera transform
+
 	auto vertBuf = transformVec3f(obj.mesh.vertices, t);
 
-	vec3f lightDir = vec3f(0.5, -0.5, 1); // light source direction (downwards)
+	vec3f lightSource = vec3f(0, 0, 1000); // light source position (above the object)
+	
+	// transform light source position with camera transform
+	float lx = lightSource.x, ly = lightSource.y, lz = lightSource.z;
+	al_transform_coordinates_3d(&cameraTransform, &lx, &ly, &lz);
+	
+	vec3f lightDir = vec3f(-lx, -ly, -lz);
+	lightDir.normalize(); // direction from object to light source
+
+	// vec3f lightDir = vec3f(0.5, -0.5, 1); // light source direction (downwards)
+	
 
 	for (int i = 0; i < obj.mesh.faces.length; i++) {
 		int[] face = obj.mesh.faces[i];
@@ -107,7 +120,7 @@ void drawObject(Object3D obj) {
 		}
 
 		// TODO: move normalize function to utility class
-		double light = normal.dotProduct(lightDir) / (normal.length() * lightDir.length());
+		double light = 0.3 + 0.7 * normal.dotProduct(lightDir) / (normal.length() * lightDir.length());
 		
 		al_draw_filled_triangle(
 			vertBuf[face[0]].x, vertBuf[face[0]].y,
@@ -120,21 +133,105 @@ void drawObject(Object3D obj) {
 	}
 }
 
+struct Camera {
+	vec2f angle;
+	float zoom;
+}
+
+class CameraController {
+
+	this(MainLoop window, Component canvas) {
+		this.camera = Camera(vec2f(0, 0), 1.0f); // initial camera position and distance
+		this.canvas = canvas;
+	}
+
+	Camera camera;
+	Component canvas;
+
+	// cache
+	private ALLEGRO_TRANSFORM t;
+
+	ref ALLEGRO_TRANSFORM getTransform() {
+		// move camera to 0,0,0, looking in from angle.x and angle.y
+		al_identity_transform(&t);
+		al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, camera.angle.x); // rotate around x-axis
+		al_rotate_transform_3d(&t, 1.0f, 0.0f, 0.0f, camera.angle.y); // rotate around y-axis
+		// al_translate_transform_3d(&t, 0.0f, 0.0f, -camera.distance);
+
+		import std.math : tan, PI;
+		float fov = tan(90 * PI / 180 / 2); // 90 degree field of view
+		float zoom = camera.zoom; // enlarge x 2
+		al_perspective_transform(&t,  
+			-1 / zoom, 1 / zoom,
+			1 / fov,
+			1 / zoom, -1 / zoom,
+			2000); // perspective projection
+
+		// move to center of screen
+		auto width = canvas.w();
+		auto height = canvas.h();
+
+		al_translate_transform_3d(&t, width / 2.0f, height / 2.0f, 0.0f);
+		return t;
+	}
+
+	public bool onKey(int code, int c, int mod) {
+		switch (code) {
+			case ALLEGRO_KEY_A:
+			case ALLEGRO_KEY_LEFT:
+				camera.angle.x -= 0.1;
+				return true;
+			case ALLEGRO_KEY_D:
+			case ALLEGRO_KEY_RIGHT:
+				camera.angle.x += 0.1;
+				return true;
+			case ALLEGRO_KEY_W:
+			case ALLEGRO_KEY_UP:
+				camera.angle.y -= 0.1;
+				return true;
+			case ALLEGRO_KEY_S:
+			case ALLEGRO_KEY_DOWN:
+				camera.angle.y += 0.1;
+				return true;
+			case ALLEGRO_KEY_PAD_PLUS:
+			case ALLEGRO_KEY_EQUALS:
+			case ALLEGRO_KEY_PGUP:
+				camera.zoom *= 1.1;
+				return true;
+			case ALLEGRO_KEY_PGDN:
+			case ALLEGRO_KEY_MINUS:
+			case ALLEGRO_KEY_PAD_MINUS:
+				camera.zoom /= 1.1;
+				return true;
+			default:
+				return false;
+				break;
+		}
+		
+	}
+
+}
+
 class World : Component {
 
 	Bitmap texture;
 	Object3D[] objects;
-	PointsObj[] pointsObj;
+	PointsObj[] pointsObj = [];
+	CameraController cameraControl;
 
 	this(MainLoop window) {
 		super(window, "world");
 		this.initResources();
-
+		cameraControl = new CameraController(window, this);
+		
 		this.objects = [
-			Object3D(generateFibonacciSpehereMesh(numPoints), vec3f(400, 400, 0), vec3f(200, 200, 200), 0.05, window.resources.bitmaps["biotope"]),
-		];
-
-		this.pointsObj = [
+			Object3D(
+				generateFibonacciSpehereMesh(numPoints), 
+					vec3f(0, 0, 0), // position 
+					vec3f(400, 400, 400), // scale
+					0, // angle 
+					window.resources.bitmaps["biotope"]
+				),
 		];
 	}
 
@@ -145,27 +242,29 @@ class World : Component {
 	override void draw(GraphicsContext gc) {
 		al_set_clipping_rectangle(this.x, this.y, this.w, this.h);
 		
+		ref ALLEGRO_TRANSFORM cameraTransform = cameraControl.getTransform();
+
 		foreach(obj; objects) {
-			drawObject(obj);
+			drawObject(obj, cameraTransform);
 		}
 
-		foreach(obj; pointsObj) {
-			drawPoints(obj);
-		}
+		// foreach(obj; pointsObj) {
+		// 	drawPoints(obj);
+		// }
 
 		al_reset_clipping_rectangle();
 	}
 
-	int numPoints = 512;
-	int dir = 1;
+	int numPoints = 256;
 
 	override void update() {
 		// TODO: use animators
 		foreach(ref obj; objects) {
 			obj.rotation += 0.002; // Rotate each object for demonstration
 		}
-		foreach(ref obj; pointsObj) {
-			obj.rotation += 0.002; // Rotate each points object for demonstration
-		}
+	}
+
+	public override bool onKey(int code, int c, int mod) {
+		return cameraControl.onKey(code, c, mod);
 	}
 }

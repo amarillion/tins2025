@@ -49,6 +49,7 @@ class MainState : DialogBuilder {
 		World world = new World(window);
 		world.setRelative(0,0,176,0,0,0,LayoutRule.STRETCH,LayoutRule.STRETCH);
 		canvas.addChild(world);
+		window.focus(world);
 
 		getElementById("btn_credits").onAction.add((e) { 
 			RichTextBuilder builder = new RichTextBuilder()
