@@ -15,13 +15,13 @@ import std.container.dlist;
 
 // After: https://github.com/moharastegaran/gift_wrapping_3d/blob/main/convex_hull.py
 
-int findNextPoint(vec3d[] points, int i1, int i2) {
-	vec3d p1 = points[i1];
-	vec3d p2 = i2 >= 0 ? points[i2] : points[i1] - vec3d(1,1,0);
+int findNextPoint(vec3f[] points, int i1, int i2) {
+	vec3f p1 = points[i1];
+	vec3f p2 = i2 >= 0 ? points[i2] : points[i1] - vec3f(1,1,0);
 
-	vec3d bestPoint;
+	vec3f bestPoint;
 	int bestPointIndex = -1;
-	vec3d edgeDelta = p2 - p1;
+	vec3f edgeDelta = p2 - p1;
 
 	foreach (i; 0 .. to!int(points.length)) {
 		if (i == i1 || i == i2) continue;
@@ -34,11 +34,11 @@ int findNextPoint(vec3d[] points, int i1, int i2) {
 			// The volume is positive if p is to the left of the plane defined by the triangle (p1,p2,best_point)
 			// This means p is a better choice than before.
 			auto p = points[i];
-			vec3d v = p - p1;
+			vec3f v = p - p1;
 			v = v - project(v, edgeDelta);
-			vec3d u = bestPoint - p1;
+			vec3f u = bestPoint - p1;
 			u = u - project(u, edgeDelta);
-			vec3d cross = u.crossProductVector(v);
+			vec3f cross = u.crossProductVector(v);
 			if (cross.dotProduct(edgeDelta) > 0) {
 				bestPoint = p;
 				bestPointIndex = i;
@@ -50,7 +50,7 @@ int findNextPoint(vec3d[] points, int i1, int i2) {
 }
 
 
-auto giftWrap3D(vec3d[] points) {
+auto giftWrap3D(vec3f[] points) {
 
 
 	Face[] hull = [];

@@ -8,7 +8,7 @@ import mesh;
 import giftwrap;
 
 auto generateFibonacciSpherePoints(int samples) {
-	vec3d[] points = [];
+	vec3f[] points = [];
 
 	double phi = PI * (sqrt(5.0) - 1.0); // golden angle in radians
 
@@ -21,14 +21,14 @@ auto generateFibonacciSpherePoints(int samples) {
 		double x = cos(theta) * radius;
 		double z = sin(theta) * radius;
 
-		points ~= vec3d(x, y, z);
+		points ~= vec3f(x, y, z);
 	}
 
 	return points;
 }
 
 auto generateFibonacciSpehereMesh(int samples) {
-	vec3d[] points = generateFibonacciSpherePoints(samples);
+	vec3f[] points = generateFibonacciSpherePoints(samples);
 	int[][] faces = [];
 
 	// foreach (i; 0 .. samples - 1) {
@@ -51,11 +51,11 @@ auto generateFibonacciSpehereMesh(int samples) {
 /** pyramid, so with a square base and an apex */
 Mesh generatePyramidMesh() {
 	return Mesh([
-		vec3d(0, 1, 0), // apex
-		vec3d(-1, -1, -1), // base vertex 1
-		vec3d(1, -1, -1), // base vertex 2
-		vec3d(1, -1, 1), // base vertex 3
-		vec3d(-1, -1, 1) // base vertex 4
+		vec3f(0, 1, 0), // apex
+		vec3f(-1, -1, -1), // base vertex 1
+		vec3f(1, -1, -1), // base vertex 2
+		vec3f(1, -1, 1), // base vertex 3
+		vec3f(-1, -1, 1) // base vertex 4
 	], [
 		[0, 1, 2],
 		[0, 2, 3],
@@ -66,14 +66,14 @@ Mesh generatePyramidMesh() {
 
 Mesh generateCubeMesh() {
 	return Mesh([
-		vec3d(-1, -1, -1), // 0
-		vec3d(1, -1, -1), // 1
-		vec3d(1, 1, -1), // 2
-		vec3d(-1, 1, -1), // 3
-		vec3d(-1, -1, 1), // 4
-		vec3d(1, -1, 1), // 5
-		vec3d(1, 1, 1), // 6
-		vec3d(-1, 1, 1) // 7
+		vec3f(-1, -1, -1), // 0
+		vec3f(1, -1, -1), // 1
+		vec3f(1, 1, -1), // 2
+		vec3f(-1, 1, -1), // 3
+		vec3f(-1, -1, 1), // 4
+		vec3f(1, -1, 1), // 5
+		vec3f(1, 1, 1), // 6
+		vec3f(-1, 1, 1) // 7
 	], [
 		[0, 1, 2],
 		[0, 2, 3],

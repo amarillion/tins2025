@@ -11,13 +11,13 @@ import std.stdio;
 import mesh;
 
 struct Object3D {
-	vec3d position;
-	vec3d scale;
+	vec3f position;
+	vec3f scale;
 	double rotation; // in radians
 	Bitmap texture;
 	Mesh mesh;
 
-	this(Mesh mesh, vec3d position, vec3d scale, double rotation, Bitmap texture) {
+	this(Mesh mesh, vec3f position, vec3f scale, double rotation, Bitmap texture) {
 		this.mesh = mesh;
 		this.position = position;
 		this.scale = scale;
@@ -27,12 +27,12 @@ struct Object3D {
 }
 
 struct PointsObj {
-	vec3d[] points;
-	vec3d position;
-	vec3d scale;
+	vec3f[] points;
+	vec3f position;
+	vec3f scale;
 	double rotation; // in radians
 
-	this(vec3d[] points, vec3d position, vec3d scale, double rotation) {
+	this(vec3f[] points, vec3f position, vec3f scale, double rotation) {
 		this.points = points;
 		this.position = position;
 		this.scale = scale;
@@ -40,12 +40,12 @@ struct PointsObj {
 	}
 }
 
-vec3d[] transformVec3d(in vec3d[] vertBuf, ALLEGRO_TRANSFORM t) {
-	vec3d[] result = new vec3d[vertBuf.length];
+vec3f[] transformVec3f(in vec3f[] vertBuf, ALLEGRO_TRANSFORM t) {
+	auto result = new vec3f[vertBuf.length];
 	for(int i = 0; i < vertBuf.length; i++) {
 		float x = vertBuf[i].x, y = vertBuf[i].y, z = vertBuf[i].z; 
 		al_transform_coordinates_3d(&t, &x, &y, &z);
-		result[i] = vec3d(x, y, z);
+		result[i] = vec3f(x, y, z);
 	}
 	return result;
 }
@@ -57,7 +57,7 @@ void drawPoints(PointsObj obj) {
 	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
 	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
 
-	vec3d[] vertBuf = transformVec3d(obj.points, t);
+	vec3f[] vertBuf = transformVec3f(obj.points, t);
 	for (int i = 0; i < vertBuf.length; i++) {
 		al_draw_filled_circle(vertBuf[i].x, vertBuf[i].y, 3.0, al_map_rgb(0, 255, 0)); // green color for points
 	}
@@ -70,7 +70,7 @@ void drawWireFrame(Object3D obj) {
 	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
 	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
 
-	vec3d[] vertBuf = transformVec3d(obj.mesh.vertices, t);
+	auto vertBuf = transformVec3f(obj.mesh.vertices, t);
 
 	for (int i = 0; i < obj.mesh.faces.length; i++) {
 		int[] face = obj.mesh.faces[i];
@@ -91,16 +91,16 @@ void drawObject(Object3D obj) {
 	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
 	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
 
-	vec3d[] vertBuf = transformVec3d(obj.mesh.vertices, t);
+	auto vertBuf = transformVec3f(obj.mesh.vertices, t);
 
-	vec3d lightDir = vec3d(0.5, -0.5, 1); // light source direction (downwards)
+	vec3f lightDir = vec3f(0.5, -0.5, 1); // light source direction (downwards)
 
 	for (int i = 0; i < obj.mesh.faces.length; i++) {
 		int[] face = obj.mesh.faces[i];
 		// calculate light from angle of normal vector of face with light source
 		
 		// TODO: move to Mesh/Face
-		vec3d normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);
+		vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);
 		
 		if (normal.z < 0) {
 			continue; // skip back faces
@@ -131,7 +131,7 @@ class World : Component {
 		this.initResources();
 
 		this.objects = [
-			Object3D(generateFibonacciSpehereMesh(numPoints), vec3d(400, 400, 0), vec3d(200, 200, 200), 0.05, window.resources.bitmaps["biotope"]),
+			Object3D(generateFibonacciSpehereMesh(numPoints), vec3f(400, 400, 0), vec3f(200, 200, 200), 0.05, window.resources.bitmaps["biotope"]),
 		];
 
 		this.pointsObj = [
