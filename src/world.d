@@ -10,6 +10,7 @@ import primitives3d;
 import std.stdio;
 import std.conv;
 import mesh;
+import helix.color;
 
 struct Object3D {
 	vec3f position;
@@ -40,6 +41,18 @@ struct PointsObj {
 		this.rotation = rotation;
 	}
 }
+
+Vertex[] transformVertices(in Vertex[] vertBuf, ALLEGRO_TRANSFORM t) {
+	Vertex[] result = new Vertex[vertBuf.length];
+	for (int i = 0; i < vertBuf.length; i++) {
+		float x = vertBuf[i].position.x, y = vertBuf[i].position.y, z = vertBuf[i].position.z; 
+		al_transform_coordinates_3d(&t, &x, &y, &z);
+		result[i] = Vertex(vec3f(x, y, z), vertBuf[i].texCoord);
+	}
+	return result;
+}
+
+/*
 
 vec3f[] transformVec3f(in vec3f[] vertBuf, ALLEGRO_TRANSFORM t) {
 	auto result = new vec3f[vertBuf.length];
@@ -83,9 +96,13 @@ void drawWireFrame(Object3D obj) {
 		);
 	}
 }
+*/
 
 void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
-
+	// ALLEGRO_TRANSFORM id;
+	// al_identity_transform(&id);
+	// al_use_transform(&id); // reset to identity transform
+	
 	ALLEGRO_TRANSFORM t;
 	al_identity_transform(&t);
 	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
@@ -94,7 +111,6 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 
 	al_compose_transform(&t, &cameraTransform); // compose with camera transform
 
-	auto vertBuf = transformVec3f(obj.mesh.vertices, t);
 
 	vec3f lightSource = vec3f(0, 0, 1000); // light source position (above the object)
 	
@@ -107,13 +123,14 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 
 	// vec3f lightDir = vec3f(0.5, -0.5, 1); // light source direction (downwards)
 	
+	Vertex[] vertBuf = transformVertices(obj.mesh.vertices, t);
 
 	for (int i = 0; i < obj.mesh.faces.length; i++) {
 		int[] face = obj.mesh.faces[i];
 		// calculate light from angle of normal vector of face with light source
 		
 		// TODO: move to Mesh/Face
-		vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);
+		vec3f normal = (vertBuf[face[1]].position - vertBuf[face[0]].position).crossProductVector(vertBuf[face[2]].position - vertBuf[face[0]].position);
 		
 		if (normal.z < 0) {
 			continue; // skip back faces
@@ -121,15 +138,28 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 
 		// TODO: move normalize function to utility class
 		double light = 0.3 + 0.7 * normal.dotProduct(lightDir) / (normal.length() * lightDir.length());
-		
-		al_draw_filled_triangle(
-			vertBuf[face[0]].x, vertBuf[face[0]].y,
-			vertBuf[face[1]].x, vertBuf[face[1]].y,
-			vertBuf[face[2]].x, vertBuf[face[2]].y,
-			al_map_rgb_f(
-				light, light, light // color based on light intensity
-			)
-		);
+
+		int[] indices = [0, 1, 2];
+
+		ALLEGRO_VERTEX[3] vertices;
+		for(int j = 0; j < 3; j++) {
+			vertices[j].x = vertBuf[face[j]].position.x;
+			vertices[j].y = vertBuf[face[j]].position.y;
+			vertices[j].z = vertBuf[face[j]].position.z;
+			vertices[j].u = vertBuf[face[j]].texCoord.x;
+			vertices[j].v = vertBuf[face[j]].texCoord.y;
+			vertices[j].color = al_map_rgb_f(light, light, light); // set color based on light intensity
+		}
+		writeln("Drawing vertices: ", vertices);
+		al_draw_prim(&vertices, null, null /*obj.texture.ptr*/, 0, 4, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
+		// al_draw_indexed_prim(&vertices, null, null /*obj.texture.ptr*/, indices.ptr, 3, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
+
+		// al_draw_triangle(
+		// 	vertices[0].x, vertices[0].y,
+		// 	vertices[1].x, vertices[1].y,
+		// 	vertices[2].x, vertices[2].y,
+		// 	al_map_rgb(255, 0, 0), 2.0 // red color with line thickness of 2
+		// );
 	}
 }
 
@@ -156,7 +186,12 @@ class CameraController {
 		al_identity_transform(&t);
 		al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, camera.angle.x); // rotate around x-axis
 		al_rotate_transform_3d(&t, 1.0f, 0.0f, 0.0f, camera.angle.y); // rotate around y-axis
-		// al_translate_transform_3d(&t, 0.0f, 0.0f, -camera.distance);
+		// al_translate_transform_3d(&t, 0.0f, 0.0f, -camera
+		// 	vertices[0].x, vertices[0].y,
+		// 	vertices[1].x, vertices[1].y,
+		// 	vertices[2].x, vertices[2].y,
+		// 	al_map_rgb(255, 0, 0), 2.0 // red color with line thickness of 2
+		// );.distance);
 
 		import std.math : tan, PI;
 		float fov = tan(90 * PI / 180 / 2); // 90 degree field of view
@@ -212,6 +247,23 @@ class CameraController {
 
 }
 
+Object3D wrapWithTextures(Mesh mesh, Bitmap texture, vec3f position, vec3f scale, double rotation) {
+	auto result = Object3D(mesh, position, scale, rotation, texture);
+	enum NUM_TILES = 8;
+
+	for (int i = 0; i < mesh.faces.length; i++) {
+		// for each face, pick a random tile
+		// and set the texture coordinates to the face vertices
+		auto face = mesh.faces[i];
+		int tileIndex = i % NUM_TILES; // simple tiling
+
+		result.mesh.vertices[face[0]].texCoord = vec2f(0, 0); // vec2f(64 * tileIndex, 0);
+		result.mesh.vertices[face[1]].texCoord = vec2f(0, 1);// vec2f(64 * tileIndex + 64, 0);
+		result.mesh.vertices[face[2]].texCoord = vec2f(1, 0);// vec2f(64 * tileIndex + 64, 64); 
+	}
+	return result;
+}
+
 class World : Component {
 
 	Bitmap texture;
@@ -224,15 +276,15 @@ class World : Component {
 		this.initResources();
 		cameraControl = new CameraController(window, this);
 		
-		this.objects = [
-			Object3D(
-				generateFibonacciSpehereMesh(numPoints), 
-					vec3f(0, 0, 0), // position 
-					vec3f(400, 400, 400), // scale
-					0, // angle 
-					window.resources.bitmaps["biotope"]
-				),
-		];
+
+		auto meshData = generateFibonacciSpehereMesh(numPoints);
+		Object3D obj = wrapWithTextures(meshData, window.resources.bitmaps["biotope"],
+			vec3f(0, 0, 0), // position 
+			vec3f(400, 400, 400), // scale
+			0, // angle 
+		);
+
+		this.objects = [ obj ];
 	}
 
 	final void initResources() {
@@ -240,6 +292,7 @@ class World : Component {
 	}
 
 	override void draw(GraphicsContext gc) {
+		al_clear_depth_buffer(1000);
 		al_set_clipping_rectangle(this.x, this.y, this.w, this.h);
 		
 		ref ALLEGRO_TRANSFORM cameraTransform = cameraControl.getTransform();

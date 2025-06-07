@@ -51,8 +51,6 @@ int findNextPoint(vec3f[] points, int i1, int i2) {
 
 
 auto giftWrap3D(vec3f[] points) {
-
-
 	Face[] hull = [];
 	Edge[] edges_available = [];
 	bool[Edge] edges_processed;
