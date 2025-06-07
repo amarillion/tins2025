@@ -20,6 +20,7 @@ import helix.widgets;
 import dialog;
 import dialogBuilder;
 import core.sys.posix.fcntl;
+import world;
 
 class MainState : DialogBuilder {
 
@@ -45,10 +46,9 @@ class MainState : DialogBuilder {
 		
 		canvas = getElementById("canvas");
 		
-		// sp = new ScrollPane(window, canvas);
-		//TODO: get layout from dialog json
-		// sp.setRelative(0,0,176,0,0,0,LayoutRule.STRETCH,LayoutRule.STRETCH);
-		// canvas.addChild(sp);
+		World world = new World(window);
+		world.setRelative(0,0,176,0,0,0,LayoutRule.STRETCH,LayoutRule.STRETCH);
+		canvas.addChild(world);
 
 		getElementById("btn_credits").onAction.add((e) { 
 			RichTextBuilder builder = new RichTextBuilder()
