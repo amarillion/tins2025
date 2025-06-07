@@ -6,10 +6,9 @@ import helix.mainloop;
 import helix.allegro.bitmap;
 import allegro5.allegro;
 import allegro5.allegro_primitives;
-import sphere;
+import primitives3d;
 import std.stdio;
-
-alias vec3d = vec!(3, double);
+import mesh;
 
 struct Object3D {
 	vec3d position;
@@ -41,31 +40,6 @@ struct PointsObj {
 	}
 }
 
-struct Mesh {
-	vec3d[] vertices;
-	int[][] faces;
-
-	this(vec3d[] vertices, int[][] faces) {
-		this.vertices = vertices;
-		this.faces = faces;
-	}
-}
-
-Mesh generatePyramidMesh() {
-	return Mesh([
-		vec3d(0, 1, 0), // apex
-		vec3d(-1, -1, -1), // base vertex 1
-		vec3d(1, -1, -1), // base vertex 2
-		vec3d(1, -1, 1), // base vertex 3
-		vec3d(-1, -1, 1) // base vertex 4
-	], [
-		[0, 1, 2],
-		[0, 2, 3],
-		[0, 3, 4],
-		[0, 4, 1]
-	]);
-}
-
 vec3d[] transformVec3d(in vec3d[] vertBuf, ALLEGRO_TRANSFORM t) {
 	vec3d[] result = new vec3d[vertBuf.length];
 	for(int i = 0; i < vertBuf.length; i++) {
@@ -81,7 +55,7 @@ void drawPoints(PointsObj obj) {
 	al_identity_transform(&t);
 	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
 	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
-	al_rotate_transform_3d(&t, 1.0f, 0.0f, 0.0f, obj.rotation); // just to see what the effect is
+	// al_rotate_transform_3d(&t, 1.0f, 0.0f, 0.0f, obj.rotation); // just to see what the effect is
 	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
 
 	vec3d[] vertBuf = transformVec3d(obj.points, t);
@@ -96,7 +70,7 @@ void drawObject(Object3D obj) {
 	al_identity_transform(&t);
 	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
 	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
-	al_rotate_transform_3d(&t, 1.0f, 0.0f, 0.0f, obj.rotation); // just to see what the effect is
+	// al_rotate_transform_3d(&t, 1.0f, 0.0f, 0.0f, obj.rotation); // just to see what the effect is
 	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
 
 	vec3d[] vertBuf = transformVec3d(obj.mesh.vertices, t);
@@ -123,11 +97,13 @@ class World : Component {
 		this.initResources();
 
 		this.objects = [
-			Object3D(generatePyramidMesh(), vec3d(100, 100, 0), vec3d(50, 50, 50), 0.05, window.resources.bitmaps["biotope"])
+			// Object3D(generatePyramidMesh(), vec3d(100, 100, 0), vec3d(50, 50, 50), 0.05, window.resources.bitmaps["biotope"]),
+			Object3D(generateCubeMesh(), vec3d(100, 100, 0), vec3d(50, 50, 50), 0.05, window.resources.bitmaps["biotope"]),
+			Object3D(generateFibonacciSpehereMesh(numPoints), vec3d(400, 400, 0), vec3d(200, 200, 200), 0.05, window.resources.bitmaps["biotope"]),
 		];
 
 		this.pointsObj = [
-			PointsObj(generateSpherePoints(20), vec3d(400, 400, 0), vec3d(200, 200, 200), 0.05),
+			PointsObj(generateFibonacciSpherePoints(numPoints), vec3d(400, 400, 0), vec3d(200, 200, 200), 0.05),
 			// PointsObj(generatePyramidMesh().vertices, vec3d(100, 100, 0), vec3d(50, 50, 50), 0.05)
 		];
 	}
@@ -150,16 +126,19 @@ class World : Component {
 		al_reset_clipping_rectangle();
 	}
 
-	int numPoints = 10;
+	int numPoints = 32;
 	int dir = 1;
 
 	override void update() {
 		numPoints += dir;
-		if(numPoints >= 500 || numPoints <= 10) {
+		if(numPoints >= 200 || numPoints <= 10) {
 			dir *= -1; // Reverse direction when limits are reached
 		}
 
-		this.pointsObj[0].points = generateSpherePoints(numPoints);
+		this.pointsObj[0].points = generateFibonacciSpherePoints(numPoints);
+		
+		// generating mesh with giftwrap algorithm is too slow beyond ~200 points for an update each frame.
+		this.objects[1].mesh = generateFibonacciSpehereMesh(numPoints);
 
 		foreach(ref obj; objects) {
 			obj.rotation += 0.01; // Rotate each object for demonstration
