@@ -93,7 +93,7 @@ void generateSingle(Bitmap spriteSheet, int x, int y) {
 				ALLEGRO_COLOR color = al_get_pixel(tile.ptr, i, j);
 				
 				// replace red color with random color
-				if (color.r > 0.7 && color.g < 0.3 && color.b < 0.3) {
+				if (color.r > 0.5 && color.g == 0 && color.b == 0) {
 					float brightness = color.r;
 					al_put_pixel(i, j, al_map_rgba_f(
 						shade1.r * brightness,
@@ -104,7 +104,7 @@ void generateSingle(Bitmap spriteSheet, int x, int y) {
 				}
 
 				// replace green color with random color
-				if (color.r < 0.3 && color.g > 0.7 && color.b < 0.3) {
+				if (color.r == 0 && color.g > 0.5 && color.b == 0) {
 					float brightness = color.g;
 					al_put_pixel(i, j, al_map_rgba_f(
 						shade2.r * brightness,
