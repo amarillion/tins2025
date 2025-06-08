@@ -76,7 +76,7 @@ RichTextBuilder species(RichTextBuilder b, MainLoop window, int sp) {
 		b
 		.h1("Selected area")
 		.biotope(window, c.biotope)
-		.text(format!`[%d, %d]`(c.x, c.y))
+		.text(format!`id: %d`(c.id))
 		.p()
 		.i(format!"Temperature: %.0f °K"(c.temperature))
 		.p()

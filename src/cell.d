@@ -14,10 +14,9 @@ import std.format;
 //referring to an element within the data structure
 class Cell {
 
-	int x, y;
-
 	// the following are all in Mol
-	
+	int id;
+
 	/** dead organic material, represented by formula ch2o */
 	double deadBiomass = 0; 
 	double co2 = START_CO2;
@@ -42,17 +41,19 @@ class Cell {
 	*/
 	SimpleSpecies[] _species;
 
-	/** constructor */
-	this(int x, int y, int height) {
-		this.x = x;
-		this.y = y;
+	/**
+	latitude is a number between -90 and 90.
+	*/
+	this(int id, int latitude) {
+		assert (latitude >= -90 && latitude <= 90, "Latitude must be between -90 and 90 degrees");
+		this.id = id;
 
 		// the following are all in Mol
 		deadBiomass = 0; // dead organic material, represented by formula ch2o
 		co2 = START_CO2;
 		o2 = 0;
 		h2o = START_H2O;
-		latitude = ((y * 160 / (height - 1)) - 80);
+		this.latitude = latitude;
 		heat = START_HEAT;
 		
 		// constant amount of stellar energy per tick
@@ -113,12 +114,12 @@ class Cell {
 		sort!"b.biomass.get() < a.biomass.get()"(_species); // TODO: check sort order...
 	}
 
-	string speciesToString() {
+	string speciesToString() const {
 		return _species.map!(i => format("%s: %.1f", i.speciesId, i.biomass)).join("\n  ");
 	}
 
 	// string representation of cell...
-	override string toString() {
+	override string toString() const {
 		return format(`[%d, %d] Biotope: %s
 Heat: %.2e GJ/km²
 Temperature: %.0f °K
@@ -134,7 +135,7 @@ O₂: %.1f
 Organic: %.1f
 
 Species: %s`, 
-	x, y, biotope, 
+	id, biotope, 
 	heat, temperature, stellarEnergy, heatLoss, albedo, albedoDebugStr, 
 	latitude, co2, h2o, o2, deadBiomass, speciesToString());
 	}

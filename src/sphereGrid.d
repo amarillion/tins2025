@@ -23,16 +23,14 @@ class SphereGrid {
 	private Cell[] cells;
 
 	// TODO: constructor function, move out of class to generalize.
-	private Cell createCell(vec3f[3] triangle) {
+	private Cell createCell(int id, vec3f[3] triangle) {
 		
-		// TODO:
 		// calculate average latitude based on triangle vertices
-		// double avgy = (triangle[0].y + triangle[1].y + triangle[2].y) / 3.0;
-		// import std.math : PI, asin;
-		// double lat = asin(avgy) * 180.0 / PI;
+		vec3f avg = (triangle[0] + triangle[1] + triangle[2]) / 3;
+		import std.math : PI, asin;
+		double lat = asin(avg.y) * 180.0 / PI;
 
-
-		return new Cell(0, 0, 10);
+		return new Cell(id, to!int(lat));
 	}
 	
 	private void initCells() {
@@ -56,7 +54,7 @@ class SphereGrid {
 		for (int i = 0; i < mesh.faces.length; i++) {
 			Face face = mesh.faces[i];
 			vec3f[3] area = [mesh.vertices[face[0]], mesh.vertices[face[1]], mesh.vertices[face[2]]];
-			cells[i] = createCell(area);
+			cells[i] = createCell(i, area);
 			for(int j = 0; j < face.length; j++) {
 				Edge edge = [face[j], face[(j + 1) % face.length]];
 				addEdge(edge, cells[i]);
