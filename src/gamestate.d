@@ -8,7 +8,6 @@ import helix.util.vec;
 import helix.util.coordrange;
 import helix.layout;
 import helix.component;
-import planetview;
 import std.json;
 import sim;
 import cell;
@@ -113,7 +112,6 @@ class GameState : State {
 	TileMap planetMap;
 	Cell currentCell;
 	RadioGroup!int speciesGroup;
-	PlanetView planetView;
 
 	int numPoints = 512;
 
@@ -133,13 +131,10 @@ class GameState : State {
 		planetViewParentElt.addChild(world);
 		window.focus(world);
 
-		planetView = new PlanetView(window);
-		// TODO
-		// planetView.selectedTile.onChange.add((e) {
-		// 	currentCell = sim.grid[e.newValue];
-		// });
-		planetViewParentElt.addChild(planetView);
-
+		world.selectedFace.onChange.add((e) {
+			currentCell = sim.grid.getCell(e.newValue);
+		});
+		
 		planetElement = getElementById("pre_planet_info");
 		logElement = cast(RichText)getElementById("rt_cell_info");
 		assert(logElement);

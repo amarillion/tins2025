@@ -15,14 +15,16 @@ import helix.allegro.shader;
 import renderSpecies;
 import startSpecies;
 import sphereGrid;
+import helix.signal;
 
-struct Object3D {
+class Object3D {
 	vec3f position;
 	vec3f scale;
 	double rotation; // in radians
 	Bitmap texture;
 	Mesh mesh;
 	int[] faceTextures;
+	int selectedFace;
 
 	this(Mesh mesh, vec3f position, vec3f scale, double rotation, Bitmap texture, int[] faceTextures) {
 		this.mesh = mesh;
@@ -45,8 +47,7 @@ vec3f[] transformVertices(in vec3f[] vertBuf, ALLEGRO_TRANSFORM t) {
 	return result;
 }
 
-void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
-	
+void drawObject(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {	
 	ALLEGRO_TRANSFORM t;
 	al_identity_transform(&t);
 	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
@@ -115,6 +116,26 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 		v += 3; // next triangle
 	}
 	al_draw_prim(&vertices, null, obj.texture.ptr, 0, v, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
+
+	// draw a triangle around selected face
+	if (obj.selectedFace >= 0 && obj.selectedFace < obj.mesh.faces.length) {
+		int[] face = obj.mesh.faces[obj.selectedFace];
+		vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);
+		
+		if (normal.z >= 0) {
+			vec3f v0 = vertBuf[face[0]];
+			vec3f v1 = vertBuf[face[1]];
+			vec3f v2 = vertBuf[face[2]];
+
+			al_draw_triangle(
+				v0.x, v0.y, 
+				v1.x, v1.y, 
+				v2.x, v2.y, 
+				Color.YELLOW,
+				2.0 // line thickness
+			);
+		}
+	}
 }
 
 struct Camera {
@@ -205,6 +226,7 @@ class World : Component {
 
 	Bitmap texture;
 	Object3D[] objects;
+	Object3D planet;
 	CameraController cameraControl;
 	Bitmap speciesTexture;
 	RenderSpecies renderSpecies;
@@ -222,7 +244,7 @@ class World : Component {
 			faceTextures[i] = (sphereGrid.getCell(i).biotope) % 8;
 		}
 
-		Object3D obj = Object3D(meshData,
+		planet = new Object3D(meshData,
 			vec3f(0, 0, 0), // position 
 			vec3f(400, 400, 400), // scale
 			0, // angle 
@@ -230,7 +252,7 @@ class World : Component {
 			faceTextures
 		);
 
-		this.objects = [ obj ];
+		this.objects = [ planet ];
 	}
 
 	void renderAllSpecies() {
@@ -277,7 +299,23 @@ class World : Component {
 		}
 	}
 
+	Model!int selectedFace;
+
 	public override bool onKey(int code, int c, int mod) {
+		if (code == ALLEGRO_KEY_TAB) {
+			import std.random : uniform;
+			planet.selectedFace = to!int(uniform(0, planet.mesh.faces.length));
+			selectedFace.set(planet.selectedFace);
+			return true;
+		}
 		return cameraControl.onKey(code, c, mod);
 	}
+
+	override void onMouseDown(Point p) {
+		// pick one at random for now.
+		import std.random : uniform;
+		planet.selectedFace = to!int(uniform(0, planet.mesh.faces.length));
+		selectedFace.set(planet.selectedFace);
+	}
+
 }
