@@ -236,7 +236,7 @@ class World : Component {
 	void initSpecies() {
 		import allegro5.allegro_color : al_color_hsv;
 		import std.random : uniform;
-		for (int i = 0; i < 512; i++) {
+		for (int i = 0; i < 1200; i++) {
 			NewSpecies newSpecies = NewSpecies(
 				[uniform(0, 8), uniform(0, 8), uniform(0, 8), uniform(0, 8)],
 				al_color_hsv(uniform(0, 360), 0.5, 1.0), // random pastel color
@@ -252,18 +252,18 @@ class World : Component {
 		setter.withVec3f("red_replacement", vec!(3, float)(species.color1.r, species.color1.g, species.color1.b));
 		setter.withVec3f("green_replacement", vec!(3, float)(species.color2.r, species.color2.g, species.color2.b));
 
-		al_draw_bitmap_region(speciesTexture.ptr, (species.layers[0] + delta) * 64, 192, 64, 64, x, y, 0);
-		al_draw_bitmap_region(speciesTexture.ptr, (species.layers[1] + delta) * 64, 0, 64, 64, x, y, 0);
-		al_draw_bitmap_region(speciesTexture.ptr, (species.layers[2] + delta) * 64, 64, 64, 64, x, y, 0);
-		al_draw_bitmap_region(speciesTexture.ptr, (species.layers[3] + delta) * 64, 128, 64, 64, x, y, 0);
+		al_draw_scaled_bitmap(speciesTexture.ptr, (species.layers[0] + delta) * 64, 192, 64, 64, x, y, 32, 32, 0);
+		al_draw_scaled_bitmap(speciesTexture.ptr, (species.layers[1] + delta) * 64, 0, 64, 64, x, y, 32, 32, 0);
+		al_draw_scaled_bitmap(speciesTexture.ptr, (species.layers[2] + delta) * 64, 64, 64, 64, x, y, 32, 32, 0);
+		al_draw_scaled_bitmap(speciesTexture.ptr, (species.layers[3] + delta) * 64, 128, 64, 64, x, y, 32, 32, 0);
 	}
 
 	Shader shader;
 	void renderAllSpecies() {
 		auto setter = shader.use(true);
 		for (int i = 0; i < species.length; i++) {
-			int x = (i % 32) * 64 + 10;
-			int y = (i / 32) * 64 + 10;
+			int x = (i % 48) * 32 + 10;
+			int y = (i / 48) * 32 + 10;
 			renderSpecies(species[i], x, y, counter + (i * 7), setter);
 		}
 		shader.use(false);
@@ -289,7 +289,7 @@ class World : Component {
 		al_reset_clipping_rectangle();
 	}
 
-	int numPoints = 256;
+	int numPoints = 1024;
 
 	int counter;
 	override void update() {
