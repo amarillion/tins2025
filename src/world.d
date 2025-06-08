@@ -6,6 +6,7 @@ import helix.mainloop;
 import helix.allegro.bitmap;
 import allegro5.allegro;
 import allegro5.allegro_primitives;
+import allegro5.allegro_color;
 import primitives3d;
 import std.stdio;
 import std.conv;
@@ -17,6 +18,7 @@ import startSpecies;
 import sphereGrid;
 import helix.signal;
 import util3d;
+import std.math;
 
 class Object3D {
 	vec3f position;
@@ -36,6 +38,56 @@ class Object3D {
 		this.faceTextures = faceTextures;
 		assert (mesh.faces.length == faceTextures.length, "Number of faces and face textures must match");
 	}
+}
+
+void drawHeatmap(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform, SphereGrid grid) {
+	assert(grid !is null);
+
+	ALLEGRO_TRANSFORM t;
+	al_identity_transform(&t);
+	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
+	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
+	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
+
+	al_compose_transform(&t, &cameraTransform); // compose with camera transform
+
+	vec3f[] vertBuf = transformVertices(obj.mesh.vertices, t);
+
+	enum VERTEX_BUFFER_SIZE = 8192;
+	ALLEGRO_VERTEX[VERTEX_BUFFER_SIZE] vertices;
+	assert(VERTEX_BUFFER_SIZE > obj.mesh.faces.length * 3, "Vertex buffer size is too small for the number of faces");
+
+	int v = 0;
+	for (int i = 0; i < obj.mesh.faces.length; i++) {
+		double temp = grid.getCell(i).temperature;
+		
+
+		double hue = (330 - temp) / 200.0 * 360.0;
+		if (hue < 0) hue = 0;
+		if (hue > 360) hue = 360;
+		ALLEGRO_COLOR color = al_color_hsv(hue, 1.0, 0.5); 
+
+		int[] face = obj.mesh.faces[i];
+		
+		// TODO: move to Mesh/Face
+		vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);
+		
+		if (normal.z < 0) {
+			continue; // skip back faces
+		}
+
+		for(int j = 0; j < 3; j++) {
+			vertices[v + j].x = vertBuf[face[j]].x;
+			vertices[v + j].y = vertBuf[face[j]].y;
+			vertices[v + j].z = 0; //vertBuf[face[j]].position.z; TODO: something goes wrong here. Depth buffer?
+
+			vertices[v + j].color = color;
+		}
+
+		v += 3; // next triangle
+	}
+	al_draw_prim(&vertices, null, null, 0, v, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
+
 }
 
 void drawObject(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {	
@@ -244,6 +296,7 @@ class World : Component {
 		);
 
 		this.objects = [ planet ];
+		this.sphereGrid = sphereGrid;
 	}
 
 	void renderAllSpecies() {
@@ -272,20 +325,25 @@ class World : Component {
 		
 		ref ALLEGRO_TRANSFORM cameraTransform = cameraControl.getTransform();
 
-		foreach(obj; objects) {
-			drawObject(obj, cameraTransform);
+		if (showHeatmap) {
+			drawHeatmap(planet, cameraTransform, sphereGrid);
 		}
+		else {
+			foreach(obj; objects) {
+				drawObject(obj, cameraTransform);
+			}
 
-		// TODO: redundant code, move to Object3D
-		ALLEGRO_TRANSFORM t;
-		al_identity_transform(&t);
-		al_scale_transform_3d(&t, planet.scale.x, planet.scale.y, planet.scale.z);
-		al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, planet.rotation);
-		al_translate_transform_3d(&t, planet.position.x, planet.position.y, planet.position.z);
+			// TODO: redundant code, move to Object3D
+			ALLEGRO_TRANSFORM t;
+			al_identity_transform(&t);
+			al_scale_transform_3d(&t, planet.scale.x, planet.scale.y, planet.scale.z);
+			al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, planet.rotation);
+			al_translate_transform_3d(&t, planet.position.x, planet.position.y, planet.position.z);
 
-		al_compose_transform(&t, &cameraTransform); // compose with camera transform
+			al_compose_transform(&t, &cameraTransform); // compose with camera transform
 
-		renderSpecies.renderSprites(START_SPECIES, sprites, planet.mesh, t, counter, cameraControl.camera.zoom);
+			renderSpecies.renderSprites(START_SPECIES, sprites, planet.mesh, t, counter, cameraControl.camera.zoom);
+		}
 
 		// this.renderAllSpecies();
 		al_reset_clipping_rectangle();
@@ -320,4 +378,8 @@ class World : Component {
 		selectedFace.set(planet.selectedFace);
 	}
 
+	bool showHeatmap;
+	void toggleHeatmap() {
+		showHeatmap = !showHeatmap;
+	}
 }

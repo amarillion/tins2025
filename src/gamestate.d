@@ -202,6 +202,11 @@ class GameState : State {
 			}
 		});
 
+		auto btn3 = getElementById("btn_toggle_heatmap");
+		btn3.onAction.add((e) {
+			world.toggleHeatmap();
+		});
+
 		initSpeciesButtons();
 	}
 
@@ -333,7 +338,6 @@ class GameState : State {
 
 		import std.stdio : writeln;
 		writeln("Species map updated: ", world.sprites.length, " sprites");
-
 	}
 
 }

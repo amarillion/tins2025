@@ -90,8 +90,18 @@
 					"width": 200,
 					"height": 24
 				}
-			}
-		]
+			}, {
+				"id": "btn_toggle_heatmap",
+				"type": "button",
+				"text": "Toggle heatmap",
+				"layout": {
+					"rule": "bottom-left",
+					"left": 430,
+					"bottom": 6,
+					"width": 200,
+					"height": 24
+				}
+			}]
 	}, {
 		"type": "panel",
 		"layout": {
