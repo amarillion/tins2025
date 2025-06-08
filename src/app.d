@@ -47,6 +47,7 @@ void main(string[] args)
 
 		mainloop.resources.addGlob("data/biotope/*.png");
 		mainloop.resources.addGlob("data/species/*.png");
+		mainloop.resources.addMusicFile("data/PlanetaryGrowth_loop_nopianosawchord.ogg");
 
 		mainloop.styles.applyResource("style");
 
@@ -57,6 +58,8 @@ void main(string[] args)
 		mainloop.addState("GameState", new GameState(mainloop));
 		mainloop.switchState("TitleState");
 		
+		mainloop.audio.playMusic(mainloop.resources.music["PlanetaryGrowth_loop_nopianosawchord"].ptr, 1.0);
+
 		mainloop.run();
 
 		return 0;
