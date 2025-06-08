@@ -35,12 +35,12 @@ struct Object3D {
 	}
 }
 
-Vertex[] transformVertices(in Vertex[] vertBuf, ALLEGRO_TRANSFORM t) {
-	Vertex[] result = new Vertex[vertBuf.length];
+vec3f[] transformVertices(in vec3f[] vertBuf, ALLEGRO_TRANSFORM t) {
+	vec3f[] result = vertBuf.dup;;
 	for (int i = 0; i < vertBuf.length; i++) {
-		float x = vertBuf[i].position.x, y = vertBuf[i].position.y, z = vertBuf[i].position.z; 
+		float x = vertBuf[i].x, y = vertBuf[i].y, z = vertBuf[i].z; 
 		al_transform_coordinates_3d(&t, &x, &y, &z);
-		result[i] = Vertex(vec3f(x, y, z), vertBuf[i].texCoord);
+		result[i] = vec3f(x, y, z);
 	}
 	return result;
 }
@@ -64,7 +64,7 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 	vec3f lightDir = vec3f(-lx, -ly, -lz);
 	lightDir.normalize(); // direction from object to light source
 	
-	Vertex[] vertBuf = transformVertices(obj.mesh.vertices, t);
+	vec3f[] vertBuf = transformVertices(obj.mesh.vertices, t);
 	
 	enum VERTEX_BUFFER_SIZE = 8192;
 	ALLEGRO_VERTEX[VERTEX_BUFFER_SIZE] vertices;
@@ -77,7 +77,7 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 		// calculate light from angle of normal vector of face with light source
 		
 		// TODO: move to Mesh/Face
-		vec3f normal = (vertBuf[face[1]].position - vertBuf[face[0]].position).crossProductVector(vertBuf[face[2]].position - vertBuf[face[0]].position);
+		vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);
 		
 		if (normal.z < 0) {
 			continue; // skip back faces
@@ -89,8 +89,8 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 		int textureIndex = i % 8;
 
 		for(int j = 0; j < 3; j++) {
-			vertices[v + j].x = vertBuf[face[j]].position.x;
-			vertices[v + j].y = vertBuf[face[j]].position.y;
+			vertices[v + j].x = vertBuf[face[j]].x;
+			vertices[v + j].y = vertBuf[face[j]].y;
 			vertices[v + j].z = 0; //vertBuf[face[j]].position.z; TODO: something goes wrong here. Depth buffer?
 
 			// the following leads to merged / overwritten tex coords
@@ -194,23 +194,6 @@ class CameraController {
 
 }
 
-Object3D wrapWithTextures(Mesh mesh, Bitmap texture, vec3f position, vec3f scale, double rotation) {
-	auto result = Object3D(mesh, position, scale, rotation, texture);
-	enum NUM_TILES = 8;
-
-	for (int i = 0; i < mesh.faces.length; i++) {
-		// for each face, pick a random tile
-		// and set the texture coordinates to the face vertices
-		auto face = mesh.faces[i];
-		int tileIndex = i % NUM_TILES; // simple tiling
-
-		result.mesh.vertices[face[0]].texCoord = vec2f(64 * tileIndex, 0);
-		result.mesh.vertices[face[1]].texCoord = vec2f(64 * tileIndex + 64, 0);
-		result.mesh.vertices[face[2]].texCoord = vec2f(64 * tileIndex, 64); 
-	}
-	return result;
-}
-
 class World : Component {
 
 	Bitmap texture;
@@ -224,10 +207,11 @@ class World : Component {
 		cameraControl = new CameraController(window, this);
 
 		auto meshData = generateFibonacciSpehereMesh(numPoints);
-		Object3D obj = wrapWithTextures(meshData, window.resources.bitmaps["biotope"],
+		Object3D obj = Object3D(meshData,
 			vec3f(0, 0, 0), // position 
 			vec3f(400, 400, 400), // scale
 			0, // angle 
+			window.resources.bitmaps["biotope"]
 		);
 
 		this.objects = [ obj ];
