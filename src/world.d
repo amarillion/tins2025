@@ -65,7 +65,13 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 	lightDir.normalize(); // direction from object to light source
 	
 	Vertex[] vertBuf = transformVertices(obj.mesh.vertices, t);
-
+	
+	enum VERTEX_BUFFER_SIZE = 8192;
+	ALLEGRO_VERTEX[VERTEX_BUFFER_SIZE] vertices;
+	assert(VERTEX_BUFFER_SIZE > obj.mesh.faces.length * 3, "Vertex buffer size is too small for the number of faces");
+	
+	int v = 0;
+	
 	for (int i = 0; i < obj.mesh.faces.length; i++) {
 		int[] face = obj.mesh.faces[i];
 		// calculate light from angle of normal vector of face with light source
@@ -80,30 +86,28 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 		// TODO: move normalize function to utility class
 		double light = 0.3 + 0.7 * normal.dotProduct(lightDir) / (normal.length() * lightDir.length());
 
-		int[] indices = [0, 1, 2];
-
-		ALLEGRO_VERTEX[3] vertices;
 		int textureIndex = i % 8;
 
 		for(int j = 0; j < 3; j++) {
-			vertices[j].x = vertBuf[face[j]].position.x;
-			vertices[j].y = vertBuf[face[j]].position.y;
-			vertices[j].z = 0; //vertBuf[face[j]].position.z; TODO: something goes wrong here. Depth buffer?
+			vertices[v + j].x = vertBuf[face[j]].position.x;
+			vertices[v + j].y = vertBuf[face[j]].position.y;
+			vertices[v + j].z = 0; //vertBuf[face[j]].position.z; TODO: something goes wrong here. Depth buffer?
 
 			// the following leads to merged / overwritten tex coords
-			// vertices[j].u = vertBuf[face[j]].texCoord.x;
-			// vertices[j].v = vertBuf[face[j]].texCoord.y;
-			vertices[j].color = al_map_rgb_f(light, light, light); // set color based on light intensity
+			// vertices[v + j].u = vertBuf[face[j]].texCoord.x;
+			// vertices[v + j].v = vertBuf[face[j]].texCoord.y;
+			vertices[v + j].color = al_map_rgb_f(light, light, light); // set color based on light intensity
 		}
 
 		// hard-resetting texture coords for each triangle
 		// we will need to do away with shared vertices if we want to make this more efficient
-		vertices[0].u = textureIndex * 64; vertices[0].v = 0;
-		vertices[1].u = textureIndex * 64 + 64; vertices[1].v = 0;
-		vertices[2].u = textureIndex * 64; vertices[2].v = 64;
-		
-		al_draw_prim(&vertices, null, obj.texture.ptr, 0, 4, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
+		vertices[v + 0].u = textureIndex * 64; vertices[v + 0].v = 0;
+		vertices[v + 1].u = textureIndex * 64 + 64; vertices[v + 1].v = 0;
+		vertices[v + 2].u = textureIndex * 64; vertices[v + 2].v = 64;
+
+		v += 3; // next triangle
 	}
+	al_draw_prim(&vertices, null, obj.texture.ptr, 0, v - 3, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
 }
 
 struct Camera {
