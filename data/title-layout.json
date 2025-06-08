@@ -6,7 +6,7 @@
 		}
 	}, {
 		"type": "image",
-		"src": "start3",
+		"src": "exokeeper3-title",
 		"layout": {
 			"rule": "stretch"
 		}
