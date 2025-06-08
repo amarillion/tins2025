@@ -19,6 +19,7 @@ import sphereGrid;
 import helix.signal;
 import util3d;
 import std.math;
+import cell;
 
 class Object3D {
 	vec3f position;
@@ -40,7 +41,7 @@ class Object3D {
 	}
 }
 
-void drawHeatmap(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform, SphereGrid grid) {
+void drawHeatmap(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform, SphereGrid grid, ALLEGRO_COLOR delegate(Cell) colorFunc) {
 	assert(grid !is null);
 
 	ALLEGRO_TRANSFORM t;
@@ -59,14 +60,6 @@ void drawHeatmap(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform, Sphere
 
 	int v = 0;
 	for (int i = 0; i < obj.mesh.faces.length; i++) {
-		double temp = grid.getCell(i).temperature;
-		
-
-		double hue = (330 - temp) / 200.0 * 360.0;
-		if (hue < 0) hue = 0;
-		if (hue > 360) hue = 360;
-		ALLEGRO_COLOR color = al_color_hsv(hue, 1.0, 0.5); 
-
 		int[] face = obj.mesh.faces[i];
 		
 		// TODO: move to Mesh/Face
@@ -75,6 +68,8 @@ void drawHeatmap(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform, Sphere
 		if (normal.z < 0) {
 			continue; // skip back faces
 		}
+
+		ALLEGRO_COLOR color = colorFunc(grid.getCell(i));
 
 		for(int j = 0; j < 3; j++) {
 			vertices[v + j].x = vertBuf[face[j]].x;
@@ -325,8 +320,20 @@ class World : Component {
 		
 		ref ALLEGRO_TRANSFORM cameraTransform = cameraControl.getTransform();
 
-		if (showHeatmap) {
-			drawHeatmap(planet, cameraTransform, sphereGrid);
+		if (showAlbedoMap) {
+			drawHeatmap(planet, cameraTransform, sphereGrid, (Cell cell) {
+				float albedo = cell.albedo;
+				return al_map_rgb_f(albedo, albedo, albedo); // grayscale based on albedo
+			});
+		}
+		else if (showHeatmap) {
+			drawHeatmap(planet, cameraTransform, sphereGrid, (Cell cell) {
+				double temp = cell.temperature;
+				double hue = (330 - temp) / 200.0 * 360.0;
+				if (hue < 0) hue = 0;
+				if (hue > 360) hue = 360;
+				return al_color_hsv(hue, 1.0, 0.5); 
+			});
 		}
 		else {
 			foreach(obj; objects) {
@@ -381,5 +388,17 @@ class World : Component {
 	bool showHeatmap;
 	void toggleHeatmap() {
 		showHeatmap = !showHeatmap;
+		if (showHeatmap) {
+			showAlbedoMap = false;
+		}
 	}
+
+	bool showAlbedoMap;
+	void toggleAlbedoOverlay() {
+		showAlbedoMap = !showAlbedoMap;
+		if (showAlbedoMap) {
+			showHeatmap = false;
+		}
+	}
+
 }

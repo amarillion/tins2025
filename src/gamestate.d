@@ -207,6 +207,11 @@ class GameState : State {
 			world.toggleHeatmap();
 		});
 
+		auto btn4 = getElementById("btn_toggle_albedo_overlay");
+		btn4.onAction.add((e) {
+			world.toggleAlbedoOverlay();
+		});
+		
 		initSpeciesButtons();
 	}
 

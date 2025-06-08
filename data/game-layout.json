@@ -101,6 +101,17 @@
 					"width": 200,
 					"height": 24
 				}
+			}, {
+				"id": "btn_toggle_albedo_overlay",
+				"type": "button",
+				"text": "Toggle albedo overlay",
+				"layout": {
+					"rule": "bottom-left",
+					"left": 640,
+					"bottom": 6,
+					"width": 200,
+					"height": 24
+				}
 			}]
 	}, {
 		"type": "panel",
