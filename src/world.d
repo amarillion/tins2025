@@ -11,6 +11,13 @@ import std.stdio;
 import std.conv;
 import mesh;
 import helix.color;
+import helix.allegro.shader;
+
+struct NewSpecies {
+	int[4] layers;
+	ALLEGRO_COLOR color1;
+	ALLEGRO_COLOR color2;
+}
 
 struct Object3D {
 	vec3f position;
@@ -281,12 +288,12 @@ class World : Component {
 	Object3D[] objects;
 	PointsObj[] pointsObj = [];
 	CameraController cameraControl;
+	Bitmap speciesTexture;
 
 	this(MainLoop window) {
 		super(window, "world");
 		this.initResources();
 		cameraControl = new CameraController(window, this);
-		
 
 		auto meshData = generateFibonacciSpehereMesh(numPoints);
 		Object3D obj = wrapWithTextures(meshData, window.resources.bitmaps["biotope"],
@@ -296,10 +303,52 @@ class World : Component {
 		);
 
 		this.objects = [ obj ];
+
+		this.initSpecies();
+	}
+
+	NewSpecies[] species;
+
+	void initSpecies() {
+		import allegro5.allegro_color : al_color_hsv;
+		import std.random : uniform;
+		for (int i = 0; i < 512; i++) {
+			NewSpecies newSpecies = NewSpecies(
+				[uniform(0, 8), uniform(0, 8), uniform(0, 8), uniform(0, 8)],
+				al_color_hsv(uniform(0, 360), 0.5, 1.0), // random pastel color
+				al_color_hsv(uniform(0, 360), 0.5, 1.0), // random pastel color
+			);
+			species ~= newSpecies;
+		}
+	}
+
+	void renderSpecies(in NewSpecies species, int x, int y, int timer, ref Shader.UniformSetter setter) {
+		int delta = (timer % 60 < 30) ? 8 : 0;
+		
+		setter.withVec3f("red_replacement", vec!(3, float)(species.color1.r, species.color1.g, species.color1.b));
+		setter.withVec3f("green_replacement", vec!(3, float)(species.color2.r, species.color2.g, species.color2.b));
+
+		al_draw_bitmap_region(speciesTexture.ptr, (species.layers[0] + delta) * 64, 192, 64, 64, x, y, 0);
+		al_draw_bitmap_region(speciesTexture.ptr, (species.layers[1] + delta) * 64, 0, 64, 64, x, y, 0);
+		al_draw_bitmap_region(speciesTexture.ptr, (species.layers[2] + delta) * 64, 64, 64, 64, x, y, 0);
+		al_draw_bitmap_region(speciesTexture.ptr, (species.layers[3] + delta) * 64, 128, 64, 64, x, y, 0);
+	}
+
+	Shader shader;
+	void renderAllSpecies() {
+		auto setter = shader.use(true);
+		for (int i = 0; i < species.length; i++) {
+			int x = (i % 32) * 64 + 10;
+			int y = (i / 32) * 64 + 10;
+			renderSpecies(species[i], x, y, counter + (i * 7), setter);
+		}
+		shader.use(false);
 	}
 
 	final void initResources() {
 		texture = window.resources.bitmaps["biotope"];
+		speciesTexture = window.resources.bitmaps["Bacteria"];
+		shader = shader.ofFragment(window.resources.shaders["color-replace"]);
 	}
 
 	override void draw(GraphicsContext gc) {
@@ -316,12 +365,16 @@ class World : Component {
 		// 	drawPoints(obj);
 		// }
 
+		this.renderAllSpecies();
 		al_reset_clipping_rectangle();
 	}
 
 	int numPoints = 256;
 
+	int counter;
 	override void update() {
+
+		counter++;
 		// TODO: use animators
 		foreach(ref obj; objects) {
 			obj.rotation += 0.002; // Rotate each object for demonstration

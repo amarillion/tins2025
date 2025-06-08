@@ -11,7 +11,7 @@ SPRITES=Bacteria
 SHEET_FILES=$(patsubst %,$(DEST)/%.png,$(SPRITES))
 
 $(SHEET_FILES): $(DEST)/%.png: $(SRC)/%.aseprite
-	aseprite -b $< --save-as $@
+	aseprite -b $< --sheet $@
 
 .PHONY: all
 all: $(SHEET_FILES)
