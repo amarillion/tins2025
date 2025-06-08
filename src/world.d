@@ -35,20 +35,6 @@ struct Object3D {
 	}
 }
 
-struct PointsObj {
-	vec3f[] points;
-	vec3f position;
-	vec3f scale;
-	double rotation; // in radians
-
-	this(vec3f[] points, vec3f position, vec3f scale, double rotation) {
-		this.points = points;
-		this.position = position;
-		this.scale = scale;
-		this.rotation = rotation;
-	}
-}
-
 Vertex[] transformVertices(in Vertex[] vertBuf, ALLEGRO_TRANSFORM t) {
 	Vertex[] result = new Vertex[vertBuf.length];
 	for (int i = 0; i < vertBuf.length; i++) {
@@ -59,56 +45,7 @@ Vertex[] transformVertices(in Vertex[] vertBuf, ALLEGRO_TRANSFORM t) {
 	return result;
 }
 
-/*
-
-vec3f[] transformVec3f(in vec3f[] vertBuf, ALLEGRO_TRANSFORM t) {
-	auto result = new vec3f[vertBuf.length];
-	for(int i = 0; i < vertBuf.length; i++) {
-		float x = vertBuf[i].x, y = vertBuf[i].y, z = vertBuf[i].z; 
-		al_transform_coordinates_3d(&t, &x, &y, &z);
-		result[i] = vec3f(x, y, z);
-	}
-	return result;
-}
-
-void drawPoints(PointsObj obj) {
-	ALLEGRO_TRANSFORM t;
-	al_identity_transform(&t);
-	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
-	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
-	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
-
-	vec3f[] vertBuf = transformVec3f(obj.points, t);
-	for (int i = 0; i < vertBuf.length; i++) {
-		al_draw_filled_circle(vertBuf[i].x, vertBuf[i].y, 3.0, al_map_rgb(0, 255, 0)); // green color for points
-	}
-}
-
-void drawWireFrame(Object3D obj) {
-	ALLEGRO_TRANSFORM t;
-	al_identity_transform(&t);
-	al_scale_transform_3d(&t, obj.scale.x, obj.scale.y, obj.scale.z);
-	al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, obj.rotation);
-	al_translate_transform_3d(&t, obj.position.x, obj.position.y, obj.position.z);
-
-	auto vertBuf = transformVec3f(obj.mesh.vertices, t);
-
-	for (int i = 0; i < obj.mesh.faces.length; i++) {
-		int[] face = obj.mesh.faces[i];
-		al_draw_triangle(
-			vertBuf[face[0]].x, vertBuf[face[0]].y,
-			vertBuf[face[1]].x, vertBuf[face[1]].y,
-			vertBuf[face[2]].x, vertBuf[face[2]].y,
-			al_map_rgb(255, 0, 0), 2.0 // red color with line thickness of 2
-		);
-	}
-}
-*/
-
 void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
-	// ALLEGRO_TRANSFORM id;
-	// al_identity_transform(&id);
-	// al_use_transform(&id); // reset to identity transform
 	
 	ALLEGRO_TRANSFORM t;
 	al_identity_transform(&t);
@@ -126,8 +63,6 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 	
 	vec3f lightDir = vec3f(-lx, -ly, -lz);
 	lightDir.normalize(); // direction from object to light source
-
-	// vec3f lightDir = vec3f(0.5, -0.5, 1); // light source direction (downwards)
 	
 	Vertex[] vertBuf = transformVertices(obj.mesh.vertices, t);
 
@@ -162,22 +97,12 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 		}
 
 		// hard-resetting texture coords for each triangle
-		// we will need to do away with shared vertices if we want to make this more efficient\
+		// we will need to do away with shared vertices if we want to make this more efficient
 		vertices[0].u = textureIndex * 64; vertices[0].v = 0;
 		vertices[1].u = textureIndex * 64 + 64; vertices[1].v = 0;
 		vertices[2].u = textureIndex * 64; vertices[2].v = 64;
 		
-		// al_draw_prim(&vtx, null, null, 0, 3, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
 		al_draw_prim(&vertices, null, obj.texture.ptr, 0, 4, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
-
-		// al_draw_indexed_prim(&vertices, null, null /*obj.texture.ptr*/, indices.ptr, 3, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
-
-		// al_draw_triangle(
-		// 	vertices[0].x, vertices[0].y,
-		// 	vertices[1].x, vertices[1].y,
-		// 	vertices[2].x, vertices[2].y,
-		// 	al_map_rgb(255, 0, 0), 2.0 // red color with line thickness of 2
-		// );
 	}
 }
 
@@ -286,7 +211,6 @@ class World : Component {
 
 	Bitmap texture;
 	Object3D[] objects;
-	PointsObj[] pointsObj = [];
 	CameraController cameraControl;
 	Bitmap speciesTexture;
 
@@ -361,11 +285,7 @@ class World : Component {
 			drawObject(obj, cameraTransform);
 		}
 
-		// foreach(obj; pointsObj) {
-		// 	drawPoints(obj);
-		// }
-
-		this.renderAllSpecies();
+		// this.renderAllSpecies();
 		al_reset_clipping_rectangle();
 	}
 
