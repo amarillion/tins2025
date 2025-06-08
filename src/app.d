@@ -47,7 +47,6 @@ void main(string[] args)
 
 		mainloop.resources.addGlob("data/biotope/*.png");
 		mainloop.resources.addGlob("data/species/*.png");
-		mainloop.resources.addGlob("data/species_cover_art/*.png");
 
 		mainloop.styles.applyResource("style");
 
