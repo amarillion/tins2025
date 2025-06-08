@@ -114,7 +114,7 @@ class GameState : State {
 	RadioGroup!int speciesGroup;
 	World world;
 
-	int numPoints = 512;
+	int numPoints = 256;
 
 	this(MainLoop window) {
 		super(window);
@@ -340,9 +340,6 @@ class GameState : State {
 				sp.biomass.tick();
 			}
 		}
-
-		import std.stdio : writeln;
-		writeln("Species map updated: ", world.sprites.length, " sprites");
 	}
 
 }

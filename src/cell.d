@@ -334,7 +334,7 @@ Species: %s`,
 		// a percentage of heat always diffuses...
 		// TODO to be realistic, we should also make this dependent on weather
 		{
-			const pct_exchange = 0.1;
+			const pct_exchange = 0.25;
 			this.diffuseProperty!"heat"(other, pct_exchange);
 		}
 	}
@@ -357,13 +357,13 @@ Species: %s`,
 		// albedo decreased by absence of dry ice or ice
 		// (this will increase albedo at the poles for a long time)
 		const dryIceEffect = this.temperature < CO2_BOILING_POINT 
-			? mapAlbedoRise(0.9, (CO2_BOILING_POINT - this.temperature) * this.co2 / 20_000) 
+			? mapAlbedoRise(0.9, (CO2_BOILING_POINT - this.temperature) * this.co2 / 10_000) 
 			: 0.9;
 		const iceEffect = this.temperature < H2O_MELTING_POINT 
-			? mapAlbedoRise(0.9, (H2O_MELTING_POINT - this.temperature) * this.h2o / 20_000) 
+			? mapAlbedoRise(0.9, (H2O_MELTING_POINT - this.temperature) * this.h2o / 10_000) 
 			: 0.9;
 		
-		const ALBEDO_BASE = 0.75;
+		const ALBEDO_BASE = 0.8;
 		this.albedo = ALBEDO_BASE * iceEffect * dryIceEffect;
 
 		albedoDebugStr = format(`%.2f * %.2f [ice] * %.2f [dryIce]`, ALBEDO_BASE, iceEffect, dryIceEffect);
@@ -383,7 +383,7 @@ Species: %s`,
 		this.heat += (1.0 - this.albedo) * this.stellarEnergy;
 
 		// percentage of heat radiates out to space
-		const heatLossPct = 0.01; // TODO: influenced by greenhouse effect and albedo
+		const heatLossPct = 0.010; // TODO: influenced by greenhouse effect and albedo
 		this.heatLoss = this.heat * heatLossPct;
 		this.heat -= (this.heatLoss);
 	}

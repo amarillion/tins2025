@@ -322,7 +322,9 @@ class World : Component {
 
 		if (showAlbedoMap) {
 			drawHeatmap(planet, cameraTransform, sphereGrid, (Cell cell) {
-				float albedo = cell.albedo;
+				float albedo = cell.albedo * 1.6 - 0.4; // scale up a bit
+				if (albedo < 0) albedo = 0;
+				if (albedo > 1) albedo = 1;
 				return al_map_rgb_f(albedo, albedo, albedo); // grayscale based on albedo
 			});
 		}
@@ -360,9 +362,10 @@ class World : Component {
 	override void update() {
 
 		counter++;
-		// TODO: use animators
-		foreach(ref obj; objects) {
-			obj.rotation += 0.002; // Rotate each object for demonstration
+
+		planet.rotation += 0.0005;
+		if (planet.rotation > 2 * PI) {
+			planet.rotation -= 2 * PI;
 		}
 	}
 
