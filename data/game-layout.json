@@ -1,0 +1,114 @@
+[
+	{
+		"type": "desktop",
+		"style": {
+			"background": "#041849",
+			"color": "#8285a9"
+		},
+		"layout": {
+			"rule": "stretch"
+		}
+	}, {
+		"type": "div", 
+		"id": "div_planet_view",
+		"layout": {
+			"rule": "stretch",
+			"right": 350,
+			"bottom": 200
+		}
+	}, {
+		"type": "div",
+		"id": "pnl_cell_view",
+		"layout": {
+			"rule": "stretch-right",
+			"width": 350,
+			"bottom": 200
+		},
+		"children": [{
+			"type": "richtext",
+			"id": "rt_cell_info",
+			"layout": {
+				"rule": "stretch",
+				"top": 8, "left": 8, "right": 8, "bottom": 8
+			},
+			"style": {
+				"color": "#8285a9",
+				"font-size": 15
+			}
+		}]
+	}, {
+		"type": "div",
+		"text": "Species info",
+		"layout": {
+			"rule": "stretch-bottom",
+			"height": 200,
+			"right": 350
+		},
+		"children": [
+			{
+				"type": "div",
+				"id": "pnl_species_buttons",
+				"layout": {
+					"rule": "stretch-top",
+					"top": 4,
+					"height": 36,
+					"left": 10,
+					"right": 10
+				}
+			}, {
+				"type": "richtext",
+				"id": "rt_species_info",
+				"style": { 
+					"background": "white"
+				},
+				"layout": {
+					"rule": "stretch",
+					"top": 46,
+					"bottom": 36,
+					"left": 10,
+					"right": 10
+				}
+			}, {
+				"id": "btn_species_introduce",
+				"type": "button",
+				"text": "Introduce species",
+				"layout": {
+					"rule": "bottom-left",
+					"left": 10,
+					"bottom": 6,
+					"width": 200,
+					"height": 24
+				}
+			}, {
+				"id": "btn_species_info",
+				"type": "button",
+				"text": "Info...",
+				"layout": {
+					"rule": "bottom-left",
+					"left": 220,
+					"bottom": 6,
+					"width": 200,
+					"height": 24
+				}
+			}
+		]
+	}, {
+		"type": "panel",
+		"layout": {
+			"rule": "bottom-right",
+			"width": 350,
+			"height": 200
+		},
+		"children": [{
+			"type": "pre",
+			"id": "pre_planet_info",
+			"layout": {
+				"rule": "stretch",
+				"top": 8, "left": 8, "right": 8, "bottom": 8
+			},
+			"style": {
+				"color": "#8285a9"
+			}
+		}]
+	}
+]

@@ -3,39 +3,39 @@
 		"type": "desktop",
 		"layout": {
 			"rule": "stretch"
-		},
-		"style": {
-			"background": "#000080" 
 		}
 	}, {
-		"id": "canvas",
-		"type": "div",
+		"type": "image",
+		"src": "start3",
 		"layout": {
 			"rule": "stretch"
 		}
 	}, {
 		"type": "div",
 		"layout": {
-			"rule": "stretch-right",
-			"top": 0,
-			"bottom": 0,
-			"right": 0,
-			"width": 176
-		},
-		"style": {
-			"background": "lightgrey"
+			"rule": "center",
+			"width": 340,
+			"height": 40
 		},
 		"children": [
 			{
+				"id": "btn_start_game",
+				"type": "button",
+				"text": "Start Game",
+				"layout": {
+					"rule": "top-left",
+					"width": 160,
+					"height": 40
+				}
+			}, {
 				"id": "btn_credits",
 				"type": "button",
 				"text": "Credits",
 				"layout": {
-					"rule": "top-right",
-					"top": 8,
-					"right": 8,
+					"rule": "top-left",
+					"left": 180,
 					"width": 160,
-					"height": 32
+					"height": 40
 				}
 			}
 		]

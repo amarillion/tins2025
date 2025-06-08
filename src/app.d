@@ -11,11 +11,17 @@ import helix.richtext;
 
 import dialog;
 import mainState;
+import engine;
+import gamestate;
+import startSpecies;
 
 void main(string[] args)
 {
 	al_run_allegro(
 	{
+		// non-allegro setup
+		initStartSpecies();
+
 		al_init();
 		auto mainloop = new MainLoop(MainConfig.of
 			.appName("tins25")
@@ -36,18 +42,22 @@ void main(string[] args)
 		});
 
 		mainloop.resources.addFile("data/DejaVuSans.ttf");
-		mainloop.resources.addFile("data/style.json");
-		mainloop.resources.addFile("data/title-layout.json");
-		mainloop.resources.addFile("data/dialog-layout.json");
+		mainloop.resources.addGlob("data/*.json");
 		mainloop.resources.addFile("data/color-replace.glsl");
 		mainloop.resources.addGlob("data/*.png");
+
+		mainloop.resources.addGlob("data/biotope/*.png");
+		mainloop.resources.addGlob("data/species/*.png");
+		mainloop.resources.addGlob("data/species_cover_art/*.png");
 
 		mainloop.styles.applyResource("style");
 
 		mainloop.onDisplaySwitch.add((switchIn) { if (switchIn) { writeln("Window switched in event called"); mainloop.resources.refreshAll(); }});
 
-		mainloop.addState("MainState", new MainState(mainloop));
-		mainloop.switchState("MainState");
+		mainloop.styles.applyResource("style");
+		mainloop.addState("TitleState", new TitleState(mainloop));
+		mainloop.addState("GameState", new GameState(mainloop));
+		mainloop.switchState("TitleState");
 		
 		mainloop.run();
 
