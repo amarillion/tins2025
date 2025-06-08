@@ -11,6 +11,8 @@ import helix.mainloop;
 import helix.richtext;
 import std.format : format;
 import std.conv : to;
+import sphereGrid;
+import mesh;
 
 struct Trigger {
 	string id;
@@ -75,44 +77,10 @@ Did you like it? Send me a message to @mpvaniersel on twitter!`)
 	)
 ];
 
-AdjacentRange!(2, T) getAdjacent(T)(Grid!(2, T) grid, Point pos) {
-	return AdjacentRange!(2, T)(grid, pos);
-}
-
-struct AdjacentRange(int N, T) {
-	
-	Grid!(N, T) parent;
-	Point pos;
-	
-	int opApply(int delegate(const ref Point) operations) const {
-		const deltas = [
-			Point(0,-1), 
-			Point(1,0), 
-			Point(0,1), 
-			Point(-1,0)
-		];
-
-		int result = 0;
-
-		foreach (i, delta; deltas) {
-			Point neighbor = Point(
-				(pos.x + parent.width + delta.x) % parent.width, 
-				pos.y + delta.y
-			);
-			if (!parent.inRange(neighbor)) continue;
-			result = operations(neighbor);
-			if (result) {
-				break;
-			}
-		}
-		return result;
-	}
-}
-
 class Sim {
 
 	/** grid for cellular automata */
-	Grid!(2, Cell) grid;
+	SphereGrid grid;
 
 	SimpleSpecies[long] species; // map of species by id.
 
@@ -120,17 +88,13 @@ class Sim {
 	long tickCounter = 0;
 	bool[string] achievements;
 
-	this(int w, int h) {
-		// TODO: return to larger grid
-		grid = new Grid!(2, Cell)(w, h);
-		foreach(p; PointRange(Point(w, h))) {
-			grid[p] = new Cell(p.x, p.y, grid.height);
-		}
+	this(Mesh meshData) {
+		grid = new SphereGrid(meshData);
 		planet = new Planet(); // planetary properties
-		init();
+		setup();
 	}
 
-	void init() {
+	private void setup() {
 		// introduce the first species with random DNA
 		// NB: the first 12 species will be hardcoded
 		foreach (i; 0..4) {
@@ -174,9 +138,10 @@ class Sim {
 		}
 
 		// for each pair of cells, do diffusion
-		foreach (c; grid.eachNodeCheckered()) {
-			foreach (other; grid.getAdjacent(Point(c.x, c.y))) {
-				c.diffusionTo(grid[other]);
+		// TODO: was eachNodeCheckered before. How to implement eachNodeCheckered for sphere grid?
+		foreach (cell; grid.eachNode()) {
+			foreach (other; grid.getAdjacent(cell)) {
+				cell.diffusionTo(other);
 			}
 		}
 	}
@@ -197,26 +162,13 @@ class Sim {
 
 	void migrate() {
 		// for each pair of cells, do migration
-		foreach (cell; grid.eachNodeCheckered()) {
-			
-			const deltas = [
-				Point(0,-1), 
-				Point(1,0), 
-				Point(0,1), 
-				Point(-1,0)
-			];
-
-			// migration direction depends on tick, with position to mix it up.
-			Point delta = deltas[to!size_t((tickCounter + cell.x + cell.y) % 4)];
-			Point neighbor = Point(
-				(cell.x + grid.width + delta.x) % grid.width, 
-				cell.y + delta.y
-			);
-			if (!grid.inRange(neighbor)) continue;
-			
-			cell.migrateTo(grid[neighbor]);
+		// TODO before I used eachNodeCheckered - random order to avoid bias. How to implement this for sphere grid?
+		foreach(long idx, ref Cell cell; grid.eachNode()) {
+			auto adjacent = grid.getAdjacent(cell);
+			// migration direction depends on tick, with index to mix it up.
+			auto neighbor = adjacent[(tickCounter + idx) % adjacent.length];
+			cell.migrateTo(neighbor);
 		}
-
 	}
 
 	void updatePlanet() {
@@ -224,7 +176,7 @@ class Sim {
 		foreach(c; grid.eachNode()) {
 			c.updateStats(this.planet);
 		}
-		const n = grid.width * grid.height;
+		const n = grid.size;
 		planet.temperature = planet.temperatureSum / n;
 		planet.albedo = planet.albedoSum / n;
 

@@ -25,6 +25,9 @@ import std.random;
 import constants;
 import world;
 import renderSpecies;
+import sphereGrid;
+import mesh;
+import primitives3d;
 
 class RadioGroup(T) {
 
@@ -108,60 +111,33 @@ class GameState : State {
 	Component planetElement;
 	RichText speciesInfoElement;
 	TileMap planetMap;
-	TileMap speciesMap;
 	Cell currentCell;
 	RadioGroup!int speciesGroup;
 	PlanetView planetView;
 
-	final void initMap() {
-		// planetMap.fromTiledJSON(window.resources.getJSON("planetscape")); 
-		planetMap = new TileMap(MAP_WIDTH, MAP_HEIGHT, 1);
-		planetMap.tilelist = TileList(Point(64, 64), 8, window.resources.bitmaps["biotope"]);
-
-		foreach (p; PointRange(Point(planetMap.width, planetMap.height))) {
-			planetMap.layers[0][p] = uniform(0, NUM_BIOTOPES);
-		}
-
-		// do some sort of voting rule
-		foreach (i; 0 .. (MAP_WIDTH * MAP_HEIGHT) * 5) {
-			// pick random cell, and copy biotope to random adjacent cell
-			Point rndpos = Point (uniform(0, planetMap.width), uniform(0, planetMap.height));
-			const Point[] adj = getAdjacent(planetMap.layers[0], rndpos).array;
-			Point choice = adj[uniform(0, adj.length)];
-			planetMap.layers[0][choice] = planetMap.layers[0][rndpos];
-		}
-
-		// initialize species map
-		speciesMap = new TileMap(MAP_WIDTH * 2, MAP_HEIGHT * 2, 2);
-		foreach (p; PointRange(Point(speciesMap.width, speciesMap.height))) {
-			speciesMap.layers[0][p] = -1;
-			speciesMap.layers[1][p] = -1;
-		}
-		speciesMap.tilelist = TileList(Point(32, 32), 32, window.resources.bitmaps["species"]);
-
-	}
+	int numPoints = 512;
 
 	this(MainLoop window) {
 		super(window);
 
+		auto meshData = generateFibonacciSpehereMesh(numPoints);
+		initSim(meshData);
+
 		/* GAME SCREEN */
 		buildDialog(window.resources.jsons["game-layout"]);
 
-		initMap();
-
-
 		auto planetViewParentElt = getElementById("div_planet_view");
 		
-		World world = new World(window);
-		// world.setRelative(0,0,176,0,0,0,LayoutRule.STRETCH,LayoutRule.STRETCH);
+		World world = new World(window, meshData, sim.grid);
+
 		planetViewParentElt.addChild(world);
 		window.focus(world);
 
 		planetView = new PlanetView(window);
-		planetView.speciesMap = speciesMap;
-		planetView.selectedTile.onChange.add((e) {
-			currentCell = sim.grid[e.newValue];
-		});
+		// TODO
+		// planetView.selectedTile.onChange.add((e) {
+		// 	currentCell = sim.grid[e.newValue];
+		// });
 		planetViewParentElt.addChild(planetView);
 
 		planetElement = getElementById("pre_planet_info");
@@ -231,10 +207,9 @@ class GameState : State {
 		});
 
 		initSpeciesButtons();
-		initSim(planetMap);
 	}
 
-	void initSpeciesButtons() {
+	private void initSpeciesButtons() {
 		Component parentElt = getElementById("pnl_species_buttons");
 		int xco = 0;
 		int yco = 0;
@@ -281,20 +256,31 @@ class GameState : State {
 		speciesGroup.value.set(-1); // nothing selected
 	}
 
-	void initSim(TileMap map) {
-		sim = new Sim(map.width, map.height);
-		currentCell = sim.grid[Point(0)];
-		this.initBiotopes(map);
+	private void initSim(Mesh meshData) {
+		sim = new Sim(meshData);
+		currentCell = sim.grid.getCell(0);
+		initBiotopes(sim.grid);
 	}
 
-	void initBiotopes(TileMap map) {
-		// copy biotopes from layer to cells
-		foreach(pos; PointRange(map.layers[0].size)) {
-			int biotope = map.layers[0][pos];
-			sim.grid[pos].biotope = biotope;
+	private void initBiotopes(SphereGrid sphereGrid) {
+		// first initalize all cells with random biotope
+		foreach(i; 0 .. sphereGrid.size) {
+			Cell cell = sphereGrid.getCell(to!int(i));
+			cell.biotope = uniform(0, NUM_BIOTOPES);
+		}
+
+		// now put some tiles the cells
+		// do some sort of voting rule
+		foreach (i; 0 .. sphereGrid.size * 20) {
+			// pick random cell, and copy biotope to random adjacent cell
+			Cell cell = sphereGrid.getCell(to!int(uniform(0, sphereGrid.size)));
+			const Cell[] adj = sphereGrid.getAdjacent(cell);
+			const Cell choice = adj[uniform(0, adj.length)];
+			
+			cell.biotope = choice.biotope; // copy biotope
+			import std.stdio : writeln;
 		}
 	}
-
 	
 	override void update() {
 		super.update();
@@ -318,6 +304,8 @@ class GameState : State {
 	}
 
 	void updateSpeciesMap() {
+		/*
+		// TODO
 		
 		foreach (cell; sim.grid.eachNode()) {
 
@@ -352,6 +340,7 @@ class GameState : State {
 				sp.biomass.tick();
 			}
 		}
+		*/
 	}
 
 }

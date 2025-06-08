@@ -14,6 +14,7 @@ import helix.color;
 import helix.allegro.shader;
 import renderSpecies;
 import startSpecies;
+import sphereGrid;
 
 struct Object3D {
 	vec3f position;
@@ -21,13 +22,16 @@ struct Object3D {
 	double rotation; // in radians
 	Bitmap texture;
 	Mesh mesh;
+	int[] faceTextures;
 
-	this(Mesh mesh, vec3f position, vec3f scale, double rotation, Bitmap texture) {
+	this(Mesh mesh, vec3f position, vec3f scale, double rotation, Bitmap texture, int[] faceTextures) {
 		this.mesh = mesh;
 		this.position = position;
 		this.scale = scale;
 		this.rotation = rotation;
 		this.texture = texture;
+		this.faceTextures = faceTextures;
+		assert (mesh.faces.length == faceTextures.length, "Number of faces and face textures must match");
 	}
 }
 
@@ -82,7 +86,7 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 		// TODO: move normalize function to utility class
 		double light = 0.3 + 0.7 * normal.dotProduct(lightDir) / (normal.length() * lightDir.length());
 
-		int textureIndex = i % 8;
+		int textureIndex = obj.faceTextures[i] % 8;
 
 		for(int j = 0; j < 3; j++) {
 			vertices[v + j].x = vertBuf[face[j]].x;
@@ -97,13 +101,20 @@ void drawObject(Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 
 		// hard-resetting texture coords for each triangle
 		// we will need to do away with shared vertices if we want to make this more efficient
-		vertices[v + 0].u = textureIndex * 64; vertices[v + 0].v = 0;
-		vertices[v + 1].u = textureIndex * 64 + 64; vertices[v + 1].v = 0;
-		vertices[v + 2].u = textureIndex * 64; vertices[v + 2].v = 64;
+		if (i % 2 == 0) { // take opposite triangles half the time...
+			vertices[v + 0].u = textureIndex * 64; vertices[v + 0].v = 0;
+			vertices[v + 1].u = textureIndex * 64 + 64; vertices[v + 1].v = 0;
+			vertices[v + 2].u = textureIndex * 64 + 64; vertices[v + 2].v = 64;
+		}
+		else {
+			vertices[v + 0].u = textureIndex * 64; vertices[v + 0].v = 64;
+			vertices[v + 1].u = textureIndex * 64; vertices[v + 1].v = 0;
+			vertices[v + 2].u = textureIndex * 64 + 64; vertices[v + 2].v = 64;
+		}
 
 		v += 3; // next triangle
 	}
-	al_draw_prim(&vertices, null, obj.texture.ptr, 0, v - 3, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
+	al_draw_prim(&vertices, null, obj.texture.ptr, 0, v, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
 }
 
 struct Camera {
@@ -197,19 +208,26 @@ class World : Component {
 	CameraController cameraControl;
 	Bitmap speciesTexture;
 	RenderSpecies renderSpecies;
+	SphereGrid sphereGrid;
 
-	this(MainLoop window) {
+	this(MainLoop window, ref Mesh meshData, SphereGrid sphereGrid) {
 		super(window, "world");
 		this.initResources();
 		cameraControl = new CameraController(window, this);
 		renderSpecies = new RenderSpecies(window);
 
-		auto meshData = generateFibonacciSpehereMesh(numPoints);
+		// copy texture indexes from faceGrid;
+		int[] faceTextures = new int[meshData.faces.length];
+		for (int i = 0; i < meshData.faces.length; i++) {
+			faceTextures[i] = (sphereGrid.getCell(i).biotope) % 8;
+		}
+
 		Object3D obj = Object3D(meshData,
 			vec3f(0, 0, 0), // position 
 			vec3f(400, 400, 400), // scale
 			0, // angle 
-			window.resources.bitmaps["biotope"]
+			window.resources.bitmaps["biotope"],
+			faceTextures
 		);
 
 		this.objects = [ obj ];
@@ -248,8 +266,6 @@ class World : Component {
 		// this.renderAllSpecies();
 		al_reset_clipping_rectangle();
 	}
-
-	int numPoints = 1024;
 
 	int counter;
 	override void update() {
