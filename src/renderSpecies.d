@@ -9,6 +9,18 @@ import allegro5.allegro;
 import allegro5.allegro_color;
 import helix.util.vec;
 import std.conv;
+import mesh;
+import util3d;
+import giftwrap;
+
+alias Face = int[3];
+
+struct Sprite {
+	int faceId;
+	int speciesId;
+	int changeTile;
+	int localIdx;
+}
 
 class RenderSpecies {
 
@@ -57,5 +69,29 @@ class RenderSpecies {
 		endRender();
 		al_set_target_bitmap(current);
 		return bmp;
+	}
+
+	void renderSprites(in SpeciesInfo[] species, Sprite[] sprites, ref Mesh mesh, ref ALLEGRO_TRANSFORM transform, int timer) {
+		startRender();
+
+		// apply camera transform to face
+		vec3f[] vertBuf = transformVertices(mesh.vertices, transform);
+
+		foreach (sprite; sprites) {
+			// get face
+			int faceId = sprite.faceId;
+			Face face = mesh.faces[faceId];
+
+			vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);		
+			if (normal.z < 0) {
+				continue; // skip back faces
+			}
+
+			// get center of face
+			vec!(3, float) center = (vertBuf[face[0]] + vertBuf[face[1]] + vertBuf[face[2]]) / 3.0;
+			
+			renderSpecies(species[sprite.speciesId], to!int(center.x), to!int(center.y), 1.0, timer);
+		}
+		endRender();
 	}
 }

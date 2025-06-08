@@ -112,6 +112,7 @@ class GameState : State {
 	TileMap planetMap;
 	Cell currentCell;
 	RadioGroup!int speciesGroup;
+	World world;
 
 	int numPoints = 512;
 
@@ -126,7 +127,7 @@ class GameState : State {
 
 		auto planetViewParentElt = getElementById("div_planet_view");
 		
-		World world = new World(window, meshData, sim.grid);
+		world = new World(window, meshData, sim.grid);
 
 		planetViewParentElt.addChild(world);
 		window.focus(world);
@@ -299,25 +300,14 @@ class GameState : State {
 	}
 
 	void updateSpeciesMap() {
-		/*
-		// TODO
-		
+		world.sprites = [];
 		foreach (cell; sim.grid.eachNode()) {
-
-			Point pos = Point(cell.x, cell.y) * 2;
-			Point[] deltas = PointRange(Point(2)).array;
-			foreach (delta; deltas) {
-				speciesMap.layers[0][pos + delta] = -1;
-				speciesMap.layers[1][pos + delta] = -1;
-			}
 
 			// get top 4 species from cell...
 			foreach (i; 0 .. min(cell.species.length, 4)) {
 				auto sp = cell.species[i];
 				if (sp.biomass.get() < 5.0) continue;
-				const tileIdx = START_SPECIES[sp.speciesId].tileIdx;
-				speciesMap.layers[0][pos + deltas[i]] = tileIdx;
-				
+								
 				double change = sp.biomass.changeRatio();
 				int tile2 = -1;
 				if (change < 0.98) {
@@ -326,16 +316,24 @@ class GameState : State {
 				else if (change > 1.02) {
 					tile2 = change > 1.04 ? 17: 16;
 				}
-				speciesMap.layers[1][pos + deltas[i]] = tile2;
+				
+				world.sprites ~= Sprite(
+					faceId: cell.id,
+					speciesId: sp.speciesId,
+					changeTile: tile2,
+					localIdx: i
+				);
 			}
-
 
 			// save each value to calculate ratio next round
 			foreach (ref sp; cell.species) {
 				sp.biomass.tick();
 			}
 		}
-		*/
+
+		import std.stdio : writeln;
+		writeln("Species map updated: ", world.sprites.length, " sprites");
+
 	}
 
 }

@@ -16,6 +16,7 @@ import renderSpecies;
 import startSpecies;
 import sphereGrid;
 import helix.signal;
+import util3d;
 
 class Object3D {
 	vec3f position;
@@ -35,16 +36,6 @@ class Object3D {
 		this.faceTextures = faceTextures;
 		assert (mesh.faces.length == faceTextures.length, "Number of faces and face textures must match");
 	}
-}
-
-vec3f[] transformVertices(in vec3f[] vertBuf, ALLEGRO_TRANSFORM t) {
-	vec3f[] result = vertBuf.dup;;
-	for (int i = 0; i < vertBuf.length; i++) {
-		float x = vertBuf[i].x, y = vertBuf[i].y, z = vertBuf[i].z; 
-		al_transform_coordinates_3d(&t, &x, &y, &z);
-		result[i] = vec3f(x, y, z);
-	}
-	return result;
 }
 
 void drawObject(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {	
@@ -231,6 +222,7 @@ class World : Component {
 	Bitmap speciesTexture;
 	RenderSpecies renderSpecies;
 	SphereGrid sphereGrid;
+	Sprite[] sprites;
 
 	this(MainLoop window, ref Mesh meshData, SphereGrid sphereGrid) {
 		super(window, "world");
@@ -284,6 +276,17 @@ class World : Component {
 		foreach(obj; objects) {
 			drawObject(obj, cameraTransform);
 		}
+
+		// TODO: redundant code, move to Object3D
+		ALLEGRO_TRANSFORM t;
+		al_identity_transform(&t);
+		al_scale_transform_3d(&t, planet.scale.x, planet.scale.y, planet.scale.z);
+		al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, planet.rotation);
+		al_translate_transform_3d(&t, planet.position.x, planet.position.y, planet.position.z);
+
+		al_compose_transform(&t, &cameraTransform); // compose with camera transform
+
+		renderSpecies.renderSprites(START_SPECIES, sprites, planet.mesh, t, counter);
 
 		// this.renderAllSpecies();
 		al_reset_clipping_rectangle();
