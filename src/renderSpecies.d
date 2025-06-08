@@ -12,6 +12,8 @@ import std.conv;
 import mesh;
 import util3d;
 import giftwrap;
+import allegro5.allegro_primitives;
+import helix.color;
 
 alias Face = int[3];
 
@@ -71,7 +73,7 @@ class RenderSpecies {
 		return bmp;
 	}
 
-	void renderSprites(in SpeciesInfo[] species, Sprite[] sprites, ref Mesh mesh, ref ALLEGRO_TRANSFORM transform, int timer) {
+	void renderSprites(in SpeciesInfo[] species, Sprite[] sprites, ref Mesh mesh, ref ALLEGRO_TRANSFORM transform, int timer, double zoom) {
 		startRender();
 
 		// apply camera transform to face
@@ -82,7 +84,8 @@ class RenderSpecies {
 			int faceId = sprite.faceId;
 			Face face = mesh.faces[faceId];
 
-			vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);		
+			// Draw sprites as billboard quads
+			vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]).normalize();
 			if (normal.z < 0) {
 				continue; // skip back faces
 			}
@@ -90,7 +93,70 @@ class RenderSpecies {
 			// get center of face
 			vec!(3, float) center = (vertBuf[face[0]] + vertBuf[face[1]] + vertBuf[face[2]]) / 3.0;
 			
-			renderSpecies(species[sprite.speciesId], to!int(center.x), to!int(center.y), 1.0, timer);
+			vec3f tangent = (vertBuf[face[0]] - vertBuf[face[1]]).normalize();
+			vec3f bitangent = normal.crossProductVector(tangent).normalize();
+
+			float halfSize = zoom * 16.0; // size in pixels?
+
+			vec3f[] spriteVerts = [
+				center + (tangent * halfSize) + (bitangent * halfSize),
+				center - (tangent * halfSize) + (bitangent * halfSize),
+				center - (tangent * halfSize) - (bitangent * halfSize),
+				center + (tangent * halfSize) - (bitangent * halfSize),
+			];
+
+			int delta = (timer % 60 < 30) ? 8 : 0;
+			int[4] index = [
+				species[sprite.speciesId].layers[0] + delta,
+				species[sprite.speciesId].layers[1] + delta,
+				species[sprite.speciesId].layers[2] + delta,
+				species[sprite.speciesId].layers[3] + delta,
+			];
+
+			// What do you mean, use a loop?
+			ALLEGRO_VERTEX[6 * 4] quad = [
+				// x, y, z, u, v, color
+				{ spriteVerts[0].x, spriteVerts[0].y, 0, (64 * index[0]) + 0.0, 192 + 0.0, Color.WHITE },
+				{ spriteVerts[1].x, spriteVerts[1].y, 0, (64 * index[0]) + 64,  192 + 0.0, Color.WHITE },
+				{ spriteVerts[2].x, spriteVerts[2].y, 0, (64 * index[0]) + 64,  192 + 64, Color.WHITE },
+				{ spriteVerts[0].x, spriteVerts[0].y, 0, (64 * index[0]) + 0.0, 192 + 0.0, Color.WHITE },
+				{ spriteVerts[2].x, spriteVerts[2].y, 0, (64 * index[0]) + 64,  192 + 64, Color.WHITE },
+				{ spriteVerts[3].x, spriteVerts[3].y, 0, (64 * index[0]) + 0.0,  192 + 64, Color.WHITE },
+
+				{ spriteVerts[0].x, spriteVerts[0].y, 0, (64 * index[1]) + 0.0, 0 + 0.0, Color.WHITE },
+				{ spriteVerts[1].x, spriteVerts[1].y, 0, (64 * index[1]) + 64,  0 + 0.0, Color.WHITE },
+				{ spriteVerts[2].x, spriteVerts[2].y, 0, (64 * index[1]) + 64,  0 + 64, Color.WHITE },
+				{ spriteVerts[0].x, spriteVerts[0].y, 0, (64 * index[1]) + 0.0, 0 + 0.0, Color.WHITE },
+				{ spriteVerts[2].x, spriteVerts[2].y, 0, (64 * index[1]) + 64,  0 + 64, Color.WHITE },
+				{ spriteVerts[3].x, spriteVerts[3].y, 0, (64 * index[1]) + 0.0, 0 + 64, Color.WHITE },
+
+				{ spriteVerts[0].x, spriteVerts[0].y, 0, (64 * index[2]) + 0.0, 64 + 0.0, Color.WHITE },
+				{ spriteVerts[1].x, spriteVerts[1].y, 0, (64 * index[2]) + 64,  64 + 0.0, Color.WHITE },
+				{ spriteVerts[2].x, spriteVerts[2].y, 0, (64 * index[2]) + 64,  64 + 64, Color.WHITE },
+				{ spriteVerts[0].x, spriteVerts[0].y, 0, (64 * index[2]) + 0.0, 64 + 0.0, Color.WHITE },
+				{ spriteVerts[2].x, spriteVerts[2].y, 0, (64 * index[2]) + 64,  64 + 64, Color.WHITE },
+				{ spriteVerts[3].x, spriteVerts[3].y, 0, (64 * index[2]) + 0.0, 64 + 64, Color.WHITE },
+
+				{ spriteVerts[0].x, spriteVerts[0].y, 0, (64 * index[3]) + 0.0, 128 + 0.0, Color.WHITE },
+				{ spriteVerts[1].x, spriteVerts[1].y, 0, (64 * index[3]) + 64,  128 + 0.0, Color.WHITE },
+				{ spriteVerts[2].x, spriteVerts[2].y, 0, (64 * index[3]) + 64,  128 + 64, Color.WHITE },
+				{ spriteVerts[0].x, spriteVerts[0].y, 0, (64 * index[3]) + 0.0, 128 + 0.0, Color.WHITE },
+				{ spriteVerts[2].x, spriteVerts[2].y, 0, (64 * index[3]) + 64,  128 + 64, Color.WHITE },
+				{ spriteVerts[3].x, spriteVerts[3].y, 0, (64 * index[3]) + 0.0, 128 + 64, Color.WHITE },
+
+			];
+			
+			// TODO: cache hsv mapped values
+			ALLEGRO_COLOR color1 = al_color_hsv(species[sprite.speciesId].hue1, 0.5, 1.0);
+			ALLEGRO_COLOR color2 = al_color_hsv(species[sprite.speciesId].hue2, 0.5, 1.0);
+
+			// // TODO: add function setter.withColor
+			setter.withVec3f("red_replacement", vec!(3, float)(color1.r, color1.g, color1.b));
+			setter.withVec3f("green_replacement", vec!(3, float)(color2.r, color2.g, color2.b));
+
+			al_draw_prim(quad.ptr, null, speciesTexture.ptr, 0, 6 * 4, ALLEGRO_PRIM_TYPE.ALLEGRO_PRIM_TRIANGLE_LIST);
+
+			// renderSpecies(species[sprite.speciesId], to!int(center.x), to!int(center.y), 1.0, timer);
 		}
 		endRender();
 	}

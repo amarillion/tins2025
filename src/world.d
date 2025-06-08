@@ -53,8 +53,7 @@ void drawObject(ref Object3D obj, ref ALLEGRO_TRANSFORM cameraTransform) {
 	float lx = lightSource.x, ly = lightSource.y, lz = lightSource.z;
 	al_transform_coordinates_3d(&cameraTransform, &lx, &ly, &lz);
 	
-	vec3f lightDir = vec3f(-lx, -ly, -lz);
-	lightDir.normalize(); // direction from object to light source
+	vec3f lightDir = vec3f(-lx, -ly, -lz).normalize(); // direction from object to light source
 	
 	vec3f[] vertBuf = transformVertices(obj.mesh.vertices, t);
 	
@@ -286,7 +285,7 @@ class World : Component {
 
 		al_compose_transform(&t, &cameraTransform); // compose with camera transform
 
-		renderSpecies.renderSprites(START_SPECIES, sprites, planet.mesh, t, counter);
+		renderSpecies.renderSprites(START_SPECIES, sprites, planet.mesh, t, counter, cameraControl.camera.zoom);
 
 		// this.renderAllSpecies();
 		al_reset_clipping_rectangle();
