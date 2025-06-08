@@ -1,5 +1,7 @@
 module startSpecies;
 
+import std.random;
+
 enum ROLE {
 	REDUCER =  0, // metabolises dead biomass using oxygen
 	PRODUCER = 1, // grows from h2o and co2
@@ -47,9 +49,20 @@ struct SpeciesInfo {
 	double[2] temperatureRange;
 	string backstory;
 	float[int] biotopeTolerances;
+
+	int[4] layers; // between 0 and 7.
+	int hue1; // between 0 and 360
+	int hue2;
 }
 
 SpeciesInfo[] START_SPECIES = null;
+
+void initRandomLook(ref SpeciesInfo species) {
+	species.layers = [uniform(0, 8), uniform(0, 8), uniform(0, 8), uniform(0, 8)],
+	// random pastel colors
+	species.hue1 = uniform(0, 360);
+	species.hue2 = uniform(0, 360);
+}
 
 void initStartSpecies() {
 	// TODO better read from JSON perhaps?
@@ -232,4 +245,8 @@ A decomposer in temperate climates.`,
 		)
 
 	];
+
+	foreach (ref species; START_SPECIES) {
+		initRandomLook(species);
+	}
 }
