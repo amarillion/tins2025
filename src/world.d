@@ -292,6 +292,10 @@ class World : Component {
 
 		this.objects = [ planet ];
 		this.sphereGrid = sphereGrid;
+
+		selectedFace.onChange.add((e) {
+			planet.selectedFace = e.newValue;
+		});
 	}
 
 	void renderAllSpecies() {
@@ -374,8 +378,7 @@ class World : Component {
 	public override bool onKey(int code, int c, int mod) {
 		if (code == ALLEGRO_KEY_TAB) {
 			import std.random : uniform;
-			planet.selectedFace = to!int(uniform(0, planet.mesh.faces.length));
-			selectedFace.set(planet.selectedFace);
+			selectedFace.set(to!int(uniform(0, planet.mesh.faces.length)));
 			return true;
 		}
 		return cameraControl.onKey(code, c, mod);
@@ -383,9 +386,44 @@ class World : Component {
 
 	override void onMouseDown(Point p) {
 		// pick one at random for now.
-		import std.random : uniform;
-		planet.selectedFace = to!int(uniform(0, planet.mesh.faces.length));
-		selectedFace.set(planet.selectedFace);
+		// import std.random : uniform;
+		// planet.selectedFace = to!int(uniform(0, planet.mesh.faces.length));
+		// selectedFace.set(planet.selectedFace);
+
+		// get planet transform
+		// TODO: copied code
+
+		ALLEGRO_TRANSFORM t;
+		al_identity_transform(&t);
+		al_scale_transform_3d(&t, planet.scale.x, planet.scale.y, planet.scale.z);
+		al_rotate_transform_3d(&t, 0.0f, 1.0f, 0.0f, planet.rotation);
+		al_translate_transform_3d(&t, planet.position.x, planet.position.y, planet.position.z);
+		ALLEGRO_TRANSFORM cameraTransform = cameraControl.getTransform();
+		al_compose_transform(&t, &cameraTransform); // compose with camera transform
+
+		vec3f[] vertBuf = transformVertices(planet.mesh.vertices, t);
+		// find face under mouse
+		for (int i = 0; i < planet.mesh.faces.length; i++) {
+			int[] face = planet.mesh.faces[i];
+
+			vec3f normal = (vertBuf[face[1]] - vertBuf[face[0]]).crossProductVector(vertBuf[face[2]] - vertBuf[face[0]]);			
+			if (normal.z < 0) {
+				continue; // skip back faces
+			}
+
+			vec2f v0 = vec2f(vertBuf[face[0]].x, vertBuf[face[0]].y);
+			vec2f v1 = vec2f(vertBuf[face[1]].x, vertBuf[face[1]].y);
+			vec2f v2 = vec2f(vertBuf[face[2]].x, vertBuf[face[2]].y);
+
+			// check if point is inside triangle
+			if (pointInTriangle(vec2f(p.x, p.y), v0, v1, v2)) {
+				planet.selectedFace = i;
+				selectedFace.set(planet.selectedFace);
+				return;
+			}
+		}
+
+
 	}
 
 	bool showHeatmap;
@@ -404,4 +442,39 @@ class World : Component {
 		}
 	}
 
+}
+
+bool pointInTriangle(vec2f P, vec2f A, vec2f B, vec2f C) {
+	// Barycentric coordinates method
+	// Compute vectors
+	vec2f v0 = C - A;
+	vec2f v1 = B - A;
+	vec2f v2 = P - A;
+
+	// Compute dot products
+	float dot00 = v0.dotProduct(v0);
+	float dot01 = v0.dotProduct(v1);
+	float dot02 = v0.dotProduct(v2);
+	float dot11 = v1.dotProduct(v1);
+	float dot12 = v1.dotProduct(v2);
+
+	// Compute barycentric coordinates
+	float denom = dot00 * dot11 - dot01 * dot01;
+	if (denom == 0.0) return false; // Degenerate triangle
+
+	float invDenom = 1.0 / denom;
+	float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+	float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+	// Check if point is in triangle
+	return (u >= 0) && (v >= 0) && (u + v <= 1);
+}
+
+unittest {
+	import std.stdio;
+	import std.math;
+
+	// Test pointInTriangle
+	assert(!pointInTriangle(vec2f(1, 1),    vec2f(0, 1), vec2f(1, 0), vec2f(0, 0)));
+	assert(pointInTriangle(vec2f(0.2, 0.2), vec2f(0, 1), vec2f(1, 0), vec2f(0, 0)));
 }
