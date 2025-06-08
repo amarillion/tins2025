@@ -40,7 +40,6 @@ biotopeTolerances:
 struct SpeciesInfo {
 	string name;
 	string iconUrl;
-	string coverArt;
 	int tileIdx;
 	uint color;
 	ROLE role;
@@ -70,7 +69,6 @@ void initStartSpecies() {
 		SpeciesInfo( // 0
 			"Plant 0",
 			"plant0",
-			"platn_intro2",
 			12,
 			0x69F0AE,
 			ROLE.PRODUCER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -85,7 +83,6 @@ Will do well in the cooler early phase of the game.`,
 		SpeciesInfo( // 1
 			"Plant 1",
 			"plant1",
-			"platn_intro1",
 			4,
 			0x388E3C,
 			ROLE.PRODUCER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -100,7 +97,6 @@ Will do well in the cooler early phase of terraformation.`,
 		), SpeciesInfo( // 2
 			"Herbivore 0",
 			"herbivore0",
-			"herbivore_intro0",
 			11,
 			0xF8BBD0,
 			ROLE.CONSUMER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -115,7 +111,6 @@ One of the hardiest herbivores that will survive in low temperatures.`,
 		), SpeciesInfo( // 3
 			"Fungus 1",
 			"fungi1",
-			"fungi_intro0",
 			13,
 			0x8D6E63,
 			ROLE.REDUCER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -130,7 +125,6 @@ You'll need to introduce a decomposer like this one, otherwise dead organic mate
 		), SpeciesInfo( // 4
 			"Microbe 1",
 			"microb1",
-			"microb_intro1",
 			1,
 			0xFFFF00,
 			ROLE.CONSUMER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -144,7 +138,6 @@ This creature is a herbivore that can survive in moderately cold climates.`,
 		), SpeciesInfo( // 5
 			"Microbe 2",
 			"microb2",
-			"microb_intro5",
 			3,
 			0x8C9EFF,
 			ROLE.REDUCER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -158,7 +151,6 @@ A useful decomposer in a moderately cold climate.`,
 		), SpeciesInfo( // 6
 			"Catcrobe 2",
 			"catcrobe2",
-			"catcrobe_intro2",
 			9,
 			0xBA68C8,
 			ROLE.CONSUMER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -172,7 +164,6 @@ This carnivorous microbe will attack and eat other microbes.`,
 		), SpeciesInfo( // 7
 			"Plant 2",
 			"microb4",
-			"microb_intro4",
 			6,
 			0x18FFFF,
 			ROLE.PRODUCER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -187,7 +178,6 @@ This is a photosynthesizing organism, a plant species that can survive in modera
 		), SpeciesInfo( // 8
 			"Plant 3",
 			"microb5",
-			"microb_intro2",
 			7,
 			0x76FF03,
 			ROLE.PRODUCER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -202,7 +192,6 @@ Let this plant species cooperate with other microbes to boost its effect.`,
 		), SpeciesInfo( // 9
 			"Microbe 3",
 			"microb3",
-			"microb_intro7",
 			8,
 			0xBBDEFB,
 			ROLE.CONSUMER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -217,7 +206,6 @@ This creature is a herbivore for temperate climes.`,
 		), SpeciesInfo( // 10
 			"Donut 1",
 			"donut1",
-			"donut_intro1",
 			5,
 			0xFF8F00,
 			ROLE.REDUCER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
@@ -232,7 +220,6 @@ A decomposer in temperate climates.`,
 		), SpeciesInfo( // 11
 			"Angry 1",
 			"angry1",
-			"angry_intro1",
 			10,
 			0xFF3D00,
 			ROLE.CONSUMER, // one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER

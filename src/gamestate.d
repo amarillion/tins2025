@@ -23,6 +23,8 @@ import helix.richtext;
 import dialog;
 import std.random;
 import constants;
+import world;
+import renderSpecies;
 
 class RadioGroup(T) {
 
@@ -150,14 +152,18 @@ class GameState : State {
 
 		auto planetViewParentElt = getElementById("div_planet_view");
 		
+		World world = new World(window);
+		// world.setRelative(0,0,176,0,0,0,LayoutRule.STRETCH,LayoutRule.STRETCH);
+		planetViewParentElt.addChild(world);
+		window.focus(world);
+
 		planetView = new PlanetView(window);
-		planetView.planetMap = planetMap;
 		planetView.speciesMap = speciesMap;
 		planetView.selectedTile.onChange.add((e) {
 			currentCell = sim.grid[e.newValue];
 		});
 		planetViewParentElt.addChild(planetView);
-	
+
 		planetElement = getElementById("pre_planet_info");
 		logElement = cast(RichText)getElementById("rt_cell_info");
 		assert(logElement);
@@ -165,6 +171,7 @@ class GameState : State {
 		assert(speciesInfoElement);
 		
 		auto btn1 = getElementById("btn_species_info");
+		RenderSpecies speciesRenderer = new RenderSpecies(window);
 		btn1.onAction.add((e) { 
 			const selectedSpecies = speciesGroup.value.get();
 			if(selectedSpecies < 0) {
@@ -175,7 +182,7 @@ class GameState : State {
 			auto info = START_SPECIES[selectedSpecies];
 			ImageComponent img = new ImageComponent(window);
 			img.setRelative(0, 0, 0, 0, 512, 384, LayoutRule.BEGIN, LayoutRule.CENTER);
-			img.img = window.resources.bitmaps[info.coverArt];
+			img.img = speciesRenderer.renderSingleSpecies(info);
 
 			RichText rt1 = new RichText(window);
 			rt1.setRelative(528, 0, 0, 0, 0, 0, LayoutRule.STRETCH, LayoutRule.STRETCH);

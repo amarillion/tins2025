@@ -47,4 +47,15 @@ class RenderSpecies {
 	Bitmap speciesTexture;
 	Shader shader;
 	Shader.UniformSetter setter;
+
+	Bitmap renderSingleSpecies(ref SpeciesInfo species) {
+		Bitmap bmp = Bitmap.create(64, 64);
+		ALLEGRO_BITMAP *current = al_get_target_bitmap();
+		al_set_target_bitmap(bmp.ptr);
+		startRender();
+		renderSpecies(species, 0, 0, 1.0, 0);
+		endRender();
+		al_set_target_bitmap(current);
+		return bmp;
+	}
 }

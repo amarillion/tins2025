@@ -22,7 +22,6 @@ class PlanetView : Component {
 		renderSpecies = new RenderSpecies(window);
 	}
 
-	TileMap planetMap;
 	TileMap speciesMap;
 	Model!Point selectedTile;
 	RenderSpecies renderSpecies;
@@ -47,8 +46,6 @@ class PlanetView : Component {
 				counter
 			);
 		}
-
-		int x, y;
 
 		// idem as teg_draw, but only a part of the target bitmap will be drawn.
 		// x, y, w and h are relative to the target bitmap coordinates
@@ -85,10 +82,10 @@ class PlanetView : Component {
 
 	override void draw(GraphicsContext gc) {
 		Point ofst = Point(0);
-		draw_tilemap(planetMap, shape, ofst);
 		drawSpeciesMap(speciesMap, shape, ofst);
 		draw_tilemap(speciesMap, shape, ofst, 1);
-		
+
+		// draw cursor
 		Point p = selectedTile.get();
 		Point p1 = p * 64;
 		Point p2 = p1 + 64;
@@ -97,7 +94,7 @@ class PlanetView : Component {
 
 	override void onMouseDown(Point p) {
 		Point mp = p / 64;
-		if (planetMap.layers[0].inRange(mp)) {
+		if (speciesMap.layers[0].inRange(mp)) {
 			selectedTile.set(mp);
 		}
 	}

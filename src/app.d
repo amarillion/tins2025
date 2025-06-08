@@ -10,7 +10,6 @@ import helix.mainloop;
 import helix.richtext;
 
 import dialog;
-import mainState;
 import engine;
 import gamestate;
 import startSpecies;
