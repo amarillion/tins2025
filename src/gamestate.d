@@ -124,13 +124,13 @@ void showSpeciesDialog(MainLoop window, int speciesId) {
 
 	foreach (k, v; info.biotopeTolerances) {
 		if (v > 0.5) {
-			rtb.biotope(window, k);
+			rtb.biotope(window, to!int(k));
 		}
 	}
 	rtb.p().text("Dislikes:").br();
 	foreach (k, v; info.biotopeTolerances) {
 		if (v < 0.5) {
-			rtb.biotope(window, k);
+			rtb.biotope(window, to!int(k));
 		}
 	}
 
@@ -258,13 +258,13 @@ class GameState : State {
 
 			foreach (k, v; info.biotopeTolerances) {
 				if (v > 0.5) {
-					rtb.biotope(window, k);
+					rtb.biotope(window, to!int(k));
 				}
 			}
 			rtb.text(" Dislikes: ");
 			foreach (k, v; info.biotopeTolerances) {
 				if (v < 0.5) {
-					rtb.biotope(window, k);
+					rtb.biotope(window, to!int(k));
 				}
 			}
 

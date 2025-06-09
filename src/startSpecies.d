@@ -24,7 +24,7 @@ SpeciesInfo[] initStartSpecies() {
 `An ancient and strong unicellular plant, but perhaps not the most effective.
 
 Will do well in the cooler early phase of the game.`,
-			[ 0: 0.1, 1: 0.5, 2: 0.5, 3: 0.5, 4: 0.5, 5: 1.0, 6: 0.1, 7: 0.5 ]
+			[ 0.1, 0.5, 0.5, 0.5, 0.5, 1.0, 0.1, 0.5 ]
 		), 
 		SpeciesInfo( // 1
 			"Plant 1",
@@ -38,7 +38,7 @@ Will do well in the cooler early phase of the game.`,
 `Legends say that this plant microbe came from a great scientist. Sounds too funny to be true.
 
 Will do well in the cooler early phase of terraformation.`,
-			[ 0: 1.0, 1: 0.1, 2: 0.5, 3: 0.5, 4: 0.5, 5: 0.1, 6: 0.5, 7: 0.5 ]
+			[ 1.0, 0.1, 0.5, 0.5, 0.5, 0.1, 0.5, 0.5 ]
 		), SpeciesInfo( // 2
 			"Herbivore 0",
 			11,
@@ -51,7 +51,7 @@ Will do well in the cooler early phase of terraformation.`,
 `A sweet but dangerous creature. Arghhh yarr! Watch yourself, be careful!
 
 One of the hardiest herbivores that will survive in low temperatures.`,
-			[ 0: 1.0, 1: 0.5, 2: 0.5, 3: 0.1, 4: 0.5, 5: 0.5, 6: 0.1, 7: 0.5 ]
+			[ 1.0, 0.5, 0.5, 0.1, 0.5, 0.5, 0.1, 0.5 ]
 		), SpeciesInfo( // 3
 			"Fungus 1",
 			13,
@@ -64,7 +64,7 @@ One of the hardiest herbivores that will survive in low temperatures.`,
 `Recycle useful substances and return them to the circle of life. Sometimes it feels like a radio wave.
 
 You'll need to introduce a decomposer like this one, otherwise dead organic material will pile up, and stifle the ecosystem.`,
-			[ 0: 0.5, 1: 0.5, 2: 1.0, 3: 0.5, 4: 1.0, 5: 0.1, 6: 0.1, 7: 0.5 ]
+			[ 0.5, 0.5, 1.0, 0.5, 1.0, 0.1, 0.1, 0.5 ]
 		), SpeciesInfo( // 4
 			"Microbe 1",
 			1,
@@ -76,7 +76,7 @@ You'll need to introduce a decomposer like this one, otherwise dead organic mate
 `The cow says Muuuu. This squishy creature does not say anything, it is a microbe. But sometimes...
 
 This creature is a herbivore that can survive in moderately cold climates.`,
-			[ 0: 0.1, 1: 1.0, 2: 0.5, 3: 0.5, 4: 0.5, 5: 0.5, 6: 0.5, 7: 0.5 ]
+			[ 0.1, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
 		), SpeciesInfo( // 5
 			"Microbe 2",
 			3,
@@ -88,7 +88,7 @@ This creature is a herbivore that can survive in moderately cold climates.`,
 `Inspired by space and ready for complexity, the bulbous mushroom! 
 
 A useful decomposer in a moderately cold climate.`,
-			[ 0: 0.5, 1: 0.1, 2: 0.1, 3: 0.9, 4: 0.9, 5: 0.5, 6: 0.5, 7: 0.5 ]
+			[ 0.5, 0.1, 0.1, 0.9, 0.9, 0.5, 0.5, 0.5 ]
 		), SpeciesInfo( // 6
 			"Catcrobe 2",
 			9,
@@ -100,7 +100,7 @@ A useful decomposer in a moderately cold climate.`,
 `This is a cat? Is it a microbe? This is a catcrobe! Micro meow!
 
 This carnivorous microbe will attack and eat other microbes.`,
-			[ 0: 0.5, 1: 0.1, 2: 0.1, 3: 0.5, 4: 0.9, 5: 0.9, 6: 0.5, 7: 0.5 ]
+			[ 0.5, 0.1, 0.1, 0.5, 0.9, 0.9, 0.5, 0.5 ]
 		), SpeciesInfo( // 7
 			"Plant 2",
 			6,
@@ -113,7 +113,7 @@ This carnivorous microbe will attack and eat other microbes.`,
 `The spiral concentrates the energy of the star and turns it into food for itself. And others.
 
 This is a photosynthesizing organism, a plant species that can survive in moderately cold climates.`,
-			[ 0: 0.5, 1: 0.1, 2: 1.0, 3: 0.5, 4: 0.5, 5: 0.5, 6: 0.1, 7: 0.5 ]
+			[ 0.5, 0.1, 1.0, 0.5, 0.5, 0.5, 0.1, 0.5 ]
 		), SpeciesInfo( // 8
 			"Plant 3",
 			7,
@@ -126,7 +126,7 @@ This is a photosynthesizing organism, a plant species that can survive in modera
 `Rise and Shine, Micro Pumpkin! Nutritious, but does not help to increase the temperature greatly.
 
 Let this plant species cooperate with other microbes to boost its effect.`,
-			[ 0: 0.5, 1: 0.5, 2: 0.5, 3: 0.5, 4: 0.1, 5: 0.9, 6: 0.5, 7: 0.5 ]
+			[ 0.5, 0.5, 0.5, 0.5, 0.1, 0.9, 0.5, 0.5 ]
 		), SpeciesInfo( // 9
 			"Microbe 3",
 			8,
@@ -139,7 +139,7 @@ Let this plant species cooperate with other microbes to boost its effect.`,
 `As we all know, bats are cool and dangerous. Therefore, even single-celled bats can eat whatever they want.
 
 This creature is a herbivore for temperate climes.`,
-			[ 0: 0.1, 1: 0.1, 2: 1.0, 3: 0.5, 4: 0.5, 5: 0.9, 6: 0.9, 7: 0.5 ]
+			[ 0.1, 0.1, 1.0, 0.5, 0.5, 0.9, 0.9, 0.5 ]
 		), SpeciesInfo( // 10
 			"Donut 1",
 			5,
@@ -152,7 +152,7 @@ This creature is a herbivore for temperate climes.`,
 `Circle of life! Or a death donut? This mushroom combines immiscible.
 
 A decomposer in temperate climates.`,
-			[ 0: 0.2, 1: 0.5, 2: 0.5, 3: 0.5, 4: 0.8, 5: 0.5, 6: 0.5, 7: 0.5 ]
+			[ 0.2, 0.5, 0.5, 0.5, 0.8, 0.5, 0.5, 0.5 ]
 		), SpeciesInfo( // 11
 			"Angry 1",
 			10,
@@ -163,7 +163,7 @@ A decomposer in temperate climates.`,
 			[ 290, 330 ], // min, max temperature in Kelvin
 			
 	`DO NOT JOKE WITH THIS MICRO BLOB TERMINATOR!!!`,
-			[ 0: 0.1, 1: 0.1, 2: 0.2, 3: 1.0, 4: 0.8, 5: 0.9, 6: 0.9, 7: 0.1 ]
+			[ 0.1, 0.1, 0.2, 1.0, 0.8, 0.9, 0.9, 0.1 ]
 		)
 	];
 	assert(START_SPECIES.length == START_SPECIES_NUM, "START_SPECIES array must have exactly START_SPECIES_NUM elements");

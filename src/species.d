@@ -3,6 +3,7 @@ module species;
 import core.sys.posix.stdlib;
 import startSpecies;
 import std.conv;
+import constants;
 
 enum START_SPECIES_NUM = 12;
 
@@ -50,7 +51,7 @@ struct SpeciesInfo {
 	double albedo;
 	double[2] temperatureRange;
 	string backstory;
-	float[int] biotopeTolerances;
+	float[NUM_BIOTOPES] biotopeTolerances;
 
 	int[4] layers; // between 0 and 7.
 	int hue1; // between 0 and 360

@@ -148,7 +148,7 @@ Species: %s`,
 			sp.status = "";
 			
 			double fitness = 1.0;
-			assert (this.biotope in info.biotopeTolerances);
+			assert (this.biotope >= 0 && this.biotope < NUM_BIOTOPES);
 			fitness *= info.biotopeTolerances[this.biotope];
 			
 			if (fitness < 0.3) {
