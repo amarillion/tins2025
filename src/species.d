@@ -157,6 +157,12 @@ class SpeciesMap {
 	}
 
 	int mutate(int speciesId) {
+		if (speciesInfo.length > 10_000) {
+			// don't mutate if we have too many species
+			return speciesId; // keep the same
+			// TODO: cull some dead species from the map.
+		}
+
 		import std.random : uniform;
 
 		// copy a species and mutate it
@@ -165,7 +171,9 @@ class SpeciesMap {
 		assert (newId !in speciesInfo);
 		
 		speciesInfo[newId] = speciesInfo[speciesId];
-		
+
+		speciesInfo[newId].name = "Variant of species " ~ to!string(speciesId);
+		speciesInfo[newId].backstory = "This is a mutant of species '" ~ speciesInfo[speciesId].name ~ "'. It has been mutated by the forces of evolution.";
 		// mutations
 		speciesInfo[newId].hue1 = (speciesInfo[newId].hue1 + uniform(0, 120) + 300) % 360;
 		speciesInfo[newId].hue2 = (speciesInfo[newId].hue2 + uniform(0, 120) + 300) % 360;

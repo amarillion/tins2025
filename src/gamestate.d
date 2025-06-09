@@ -102,6 +102,45 @@ Organic: %.1f`(
 		return b;
 	}
 
+void showSpeciesDialog(MainLoop window, int speciesId) {
+	Component slotted = new Component(window, "default");
+	RenderSpecies speciesRenderer = new RenderSpecies(window);
+
+	auto info = SpeciesMap.ALL_SPECIES.get(speciesId);
+	ImageComponent img = new ImageComponent(window);
+	img.setRelative(0, 0, 0, 0, 512, 384, LayoutRule.BEGIN, LayoutRule.CENTER);
+	img.img = speciesRenderer.getSpeciesRenderData(speciesId).icon;
+
+	RichText rt1 = new RichText(window);
+	rt1.setRelative(528, 0, 0, 0, 0, 0, LayoutRule.STRETCH, LayoutRule.STRETCH);
+	
+	auto rtb = new RichTextBuilder().h1("Species info")
+		.text(format!"Name: %s"(info.name)).br()
+		.text(info.backstory)
+		.p()
+		.lines(format("Temperature tolerance between %.0f °K and %.0f °K\nAlbedo contribution: %.2f (lower is better)", 
+			info.temperatureRange[0], info.temperatureRange[1], info.albedo)).br()
+		.text("Likes:").br();
+
+	foreach (k, v; info.biotopeTolerances) {
+		if (v > 0.5) {
+			rtb.biotope(window, k);
+		}
+	}
+	rtb.p().text("Dislikes:").br();
+	foreach (k, v; info.biotopeTolerances) {
+		if (v < 0.5) {
+			rtb.biotope(window, k);
+		}
+	}
+
+	rt1.setFragments(rtb.build());
+	
+	slotted.addChild(img);
+	slotted.addChild(rt1);
+	Dialog dlg = new Dialog(window, slotted);
+	window.pushScene(dlg);
+}
 
 class GameState : State {
 
@@ -143,48 +182,12 @@ class GameState : State {
 		assert(speciesInfoElement);
 		
 		auto btn1 = getElementById("btn_species_info");
-		RenderSpecies speciesRenderer = new RenderSpecies(window);
 		btn1.onAction.add((e) { 
 			const selectedSpecies = speciesGroup.value.get();
 			if(selectedSpecies < 0) {
 				return;
 			}
-			Component slotted = new Component(window, "default");
-
-			auto info = SpeciesMap.ALL_SPECIES.get(selectedSpecies);
-			ImageComponent img = new ImageComponent(window);
-			img.setRelative(0, 0, 0, 0, 512, 384, LayoutRule.BEGIN, LayoutRule.CENTER);
-			img.img = speciesRenderer.getSpeciesRenderData(selectedSpecies).icon;
-
-			RichText rt1 = new RichText(window);
-			rt1.setRelative(528, 0, 0, 0, 0, 0, LayoutRule.STRETCH, LayoutRule.STRETCH);
-			
-			auto rtb = new RichTextBuilder().h1("Species info")
-				.text(format!"Name: %s"(info.name)).br()
-				.text(info.backstory)
-				.p()
-				.lines(format("Temperature tolerance between %.0f °K and %.0f °K\nAlbedo contribution: %.2f (lower is better)", 
-					info.temperatureRange[0], info.temperatureRange[1], info.albedo)).br()
-				.text("Likes:").br();
-
-			foreach (k, v; info.biotopeTolerances) {
-				if (v > 0.5) {
-					rtb.biotope(window, k);
-				}
-			}
-			rtb.p().text("Dislikes:").br();
-			foreach (k, v; info.biotopeTolerances) {
-				if (v < 0.5) {
-					rtb.biotope(window, k);
-				}
-			}
-
-			rt1.setFragments(rtb.build());
-			
-			slotted.addChild(img);
-			slotted.addChild(rt1);
-			Dialog dlg = new Dialog(window, slotted);
-			window.pushScene(dlg);
+			showSpeciesDialog(window, selectedSpecies);
 		});
 
 		auto btn2 = getElementById("btn_species_introduce");

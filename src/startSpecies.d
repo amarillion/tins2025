@@ -73,7 +73,7 @@ You'll need to introduce a decomposer like this one, otherwise dead organic mate
 			[ 0: INTERACTION.EAT, 1: INTERACTION.EAT, 7: INTERACTION.EAT, 8: INTERACTION.EAT ],
 			0.7, // 1.0 = light & early game 0.0 == dark & late game
 			[ 250, 295 ], // min, max temperature in Kelvin
-`The cow says Muuuu. This yellow creature does not say anything, it is a microbe. But sometimes...
+`The cow says Muuuu. This squishy creature does not say anything, it is a microbe. But sometimes...
 
 This creature is a herbivore that can survive in moderately cold climates.`,
 			[ 0: 0.1, 1: 1.0, 2: 0.5, 3: 0.5, 4: 0.5, 5: 0.5, 6: 0.5, 7: 0.5 ]
@@ -85,7 +85,7 @@ This creature is a herbivore that can survive in moderately cold climates.`,
 			null,
 			0.5, // 1.0 = light & early game 0.0 == dark & late game
 			[ 255, 305 ], // min, max temperature in Kelvin
-`Inspired by space and ready for complexity, the purple mushroom! 
+`Inspired by space and ready for complexity, the bulbous mushroom! 
 
 A useful decomposer in a moderately cold climate.`,
 			[ 0: 0.5, 1: 0.1, 2: 0.1, 3: 0.9, 4: 0.9, 5: 0.5, 6: 0.5, 7: 0.5 ]
@@ -123,7 +123,7 @@ This is a photosynthesizing organism, a plant species that can survive in modera
 			0.8, // 1.0 = light & early game 0.0 == dark & late game
 			[ 280, 325 ], // min, max temperature in Kelvin
 			
-`Rise and Shine, Micro Pumpkin!  Nutritious, but does not help to increase the temperature greatly.
+`Rise and Shine, Micro Pumpkin! Nutritious, but does not help to increase the temperature greatly.
 
 Let this plant species cooperate with other microbes to boost its effect.`,
 			[ 0: 0.5, 1: 0.5, 2: 0.5, 3: 0.5, 4: 0.1, 5: 0.9, 6: 0.5, 7: 0.5 ]
@@ -162,7 +162,7 @@ A decomposer in temperate climates.`,
 			0.8, // 1.0 = light & early game 0.0 == dark & late game
 			[ 290, 330 ], // min, max temperature in Kelvin
 			
-	`DO NOT JOKE WITH THIS MICRO RED TERMINATOR!!!`,
+	`DO NOT JOKE WITH THIS MICRO BLOB TERMINATOR!!!`,
 			[ 0: 0.1, 1: 0.1, 2: 0.2, 3: 1.0, 4: 0.8, 5: 0.9, 6: 0.9, 7: 0.1 ]
 		)
 	];

@@ -28,7 +28,7 @@ const TRIGGERS = [
 			.h1(`Welcome to Exo Keeper`)
 			.text(format!`After a voyage of hundreds of lightyears, you have now arrived. Before you lies the barren surface of Kepler-7311b
 Your goal is to make the surface suitable for human inhabitation. 
-But the planet is far too cold. At a breezy %.0f °K / %.0f °C) it's impossible to 
+But the planet is far too cold. At a breezy %.0f °K (%.0f °C) it's impossible to 
 step outside without a jacket. Plus, there is no oxygen atmosphere.`(sim.planet.temperature, sim.planet.temperature - 273))
 			.p()
 			.text(`To terraform the planet, we must introduce some microbe species to the surface.`)
@@ -72,7 +72,7 @@ The ice has melted, there is oxygen in the atmosphere, the surface is teeming wi
 Well done, you have taken this game as far as it goes!`(sim.planet.temperature, sim.planet.temperature - 273))
 			.p()
 			.text(`Thank you for playing.
-Did you like it? Send me a message to @mpvaniersel on twitter!`)
+Did you like it? Send me a message to @mpvaniersel on Bluesky!`)
 			.build()
 	)
 ];
@@ -166,8 +166,11 @@ class Sim {
 		if (topSpecies.biomass.get() < 5.0) return; // not enough biomass to evolve.
 		// split off 1.0 units
 		auto newSpecies = SpeciesMap.ALL_SPECIES.mutate(topSpecies.speciesId);
-		randomCell.addSpecies(newSpecies, 1.0);
-		topSpecies.biomass -= 1.0;
+		// mutate returns the same id if mutation wasn't possible.
+		if (newSpecies != topSpecies.speciesId) {
+			randomCell.addSpecies(newSpecies, 1.0);
+			topSpecies.biomass -= 1.0;
+		}
 	}
 
 	void migrate() {
