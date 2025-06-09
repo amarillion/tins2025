@@ -305,9 +305,9 @@ class GameState : State {
 	override void update() {
 		super.update();
 
-		// in original game, delay was 500 msec
 		static int tickDelay = 0;
-		if (tickDelay++ == 5) {
+		// delay of ~250 msec
+		if (tickDelay++ == 15) {
 			tickAndLog();
 			tickDelay = 0;
 		}
