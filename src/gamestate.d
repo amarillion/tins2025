@@ -306,8 +306,8 @@ class GameState : State {
 		super.update();
 
 		static int tickDelay = 0;
-		// delay of ~250 msec
-		if (tickDelay++ == 15) {
+		// delay of ~500 msec
+		if (tickDelay++ == 30) {
 			tickAndLog();
 			tickDelay = 0;
 		}
