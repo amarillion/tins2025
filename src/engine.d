@@ -122,13 +122,18 @@ class TitleState : State {
 			RichTextBuilder builder = new RichTextBuilder()
 				.h1("Exo Keeper III")
 				.text("Exo Keeper III is a game about surviving and thriving on an exo-planet.").br()
-				.text("This was made by ").b("Amarillion, Max and AniCator")
-				.text(" during the TINS 2025 Game Jam!").p()
+				.text("This was made by")
+				.p()
+				.b("Amarillion").text(" (3D engine programming)").br()
+				.b("Max").text(" (Cure and Adorable Sprites)").br()
+				.b("AniCator").text(" (Musical chaos)")
+				.p()
+				.text("during the ").link("TINS 2025 Game Jam", "https://tins.amarillion.org/2025").text("!").p()
 				.text("This is an Allegro remake of a game originally made for ").link("Ludum Dare 46", "https://ldjam.com/events/ludum-dare/46/exo-keeper").p()
 				.text("The following people contributed to the original").p()
 				.link("Georgii 'Gekaremi' Karelin", "https://github.com/gekaremi").text(" (Concept & scientific discussion)").br()
-				.link("Tatiana Kondratieva", "https://www.instagram.com/l_p_kongroo").text(" (Microbe Art)").br()
-				.link("Dónall O'Donoghue", "http://www.dodonoghue.com/").text(" (Music out of this world)").br();
+				.link("Tatiana Kondratieva", "https://www.instagram.com/l_p_kongroo").text(" (Original Microbe Art)").br()
+				.link("Dónall O'Donoghue", "http://www.dodonoghue.com/").text(" (Original Music)").br();
 			openDialog(window, builder.build());
 		});
 
