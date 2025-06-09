@@ -367,9 +367,11 @@ class World : Component {
 
 		counter++;
 
-		planet.rotation += 0.0005;
-		if (planet.rotation > 2 * PI) {
-			planet.rotation -= 2 * PI;
+		if (rotatePlanet) {
+			planet.rotation += 0.0005;
+			if (planet.rotation > 2 * PI) {
+				planet.rotation -= 2 * PI;
+			}
 		}
 	}
 
@@ -426,7 +428,7 @@ class World : Component {
 
 	}
 
-	bool showHeatmap;
+	bool showHeatmap = false;
 	void toggleHeatmap() {
 		showHeatmap = !showHeatmap;
 		if (showHeatmap) {
@@ -434,7 +436,7 @@ class World : Component {
 		}
 	}
 
-	bool showAlbedoMap;
+	bool showAlbedoMap = false;
 	void toggleAlbedoOverlay() {
 		showAlbedoMap = !showAlbedoMap;
 		if (showAlbedoMap) {
@@ -442,6 +444,15 @@ class World : Component {
 		}
 	}
 
+	void clearOverlays() {
+		showHeatmap = false;
+		showAlbedoMap = false;
+	}
+
+	bool rotatePlanet = true;
+	void toggleRotation() {
+		rotatePlanet = !rotatePlanet;
+	}
 }
 
 bool pointInTriangle(vec2f P, vec2f A, vec2f B, vec2f C) {

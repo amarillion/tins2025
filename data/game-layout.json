@@ -76,7 +76,7 @@
 					"rule": "bottom-left",
 					"left": 10,
 					"bottom": 6,
-					"width": 200,
+					"width": 160,
 					"height": 24
 				}
 			}, {
@@ -85,9 +85,9 @@
 				"text": "Info...",
 				"layout": {
 					"rule": "bottom-left",
-					"left": 220,
+					"left": 180,
 					"bottom": 6,
-					"width": 200,
+					"width": 160,
 					"height": 24
 				}
 			}, {
@@ -96,20 +96,42 @@
 				"text": "Toggle heatmap",
 				"layout": {
 					"rule": "bottom-left",
-					"left": 430,
+					"left": 350,
 					"bottom": 6,
-					"width": 200,
+					"width": 160,
 					"height": 24
 				}
 			}, {
 				"id": "btn_toggle_albedo_overlay",
 				"type": "button",
-				"text": "Toggle albedo overlay",
+				"text": "Albedo overlay",
 				"layout": {
 					"rule": "bottom-left",
-					"left": 640,
+					"left": 520,
 					"bottom": 6,
-					"width": 200,
+					"width": 160,
+					"height": 24
+				}
+			}, {
+				"id": "btn_view_species",
+				"type": "button",
+				"text": "View Organisms",
+				"layout": {
+					"rule": "bottom-left",
+					"left": 690,
+					"bottom": 6,
+					"width": 160,
+					"height": 24
+				}
+			}, {
+				"id": "btn_toggle_rotation",
+				"type": "button",
+				"text": "Planet Rotation",
+				"layout": {
+					"rule": "bottom-left",
+					"left": 860,
+					"bottom": 6,
+					"width": 160,
 					"height": 24
 				}
 			}]

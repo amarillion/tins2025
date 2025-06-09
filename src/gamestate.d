@@ -211,7 +211,17 @@ class GameState : State {
 		btn4.onAction.add((e) {
 			world.toggleAlbedoOverlay();
 		});
-		
+
+		auto btn5 = getElementById("btn_view_species");
+		btn5.onAction.add((e) {
+			world.clearOverlays();
+		});
+
+		auto btn6 = getElementById("btn_toggle_rotation");
+		btn6.onAction.add((e) {
+			world.toggleRotation();
+		});
+
 		initSpeciesButtons();
 	}
 
