@@ -12,15 +12,11 @@ import helix.richtext;
 import dialog;
 import engine;
 import gamestate;
-import startSpecies;
 
 void main(string[] args)
 {
 	al_run_allegro(
 	{
-		// non-allegro setup
-		initStartSpecies();
-
 		al_init();
 		auto mainloop = new MainLoop(MainConfig.of
 			.appName("tins25")

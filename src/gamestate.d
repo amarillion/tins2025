@@ -15,7 +15,6 @@ import std.conv;
 import std.format;
 import std.array;
 import std.algorithm;
-import startSpecies;
 import helix.signal;
 import helix.timer;
 import helix.richtext;
@@ -27,6 +26,7 @@ import renderSpecies;
 import sphereGrid;
 import mesh;
 import primitives3d;
+import species;
 
 class RadioGroup(T) {
 
@@ -67,7 +67,7 @@ RichTextBuilder biotope(RichTextBuilder b, MainLoop window, int biotope) {
 	return b.img(window.resources.bitmaps[biotopes[biotope]]);
 }
 
-RichTextBuilder species(RichTextBuilder b, MainLoop window, int sp) {
+RichTextBuilder speciesIcon(RichTextBuilder b, MainLoop window, int sp) {
 	return b.img(new RenderSpecies(window).getSpeciesRenderData(sp).icon);
 }
 
@@ -94,7 +94,7 @@ Organic: %.1f`(
 	c.heat, c.stellarEnergy, c.heatLoss, c.albedo, 
 	c.latitude, c.co2, c.h2o, c.o2, c.deadBiomass)).p();
 		foreach(ref sp; c._species) { b
-			.species(window, to!int(sp.speciesId))
+			.speciesIcon(window, to!int(sp.speciesId))
 			.text(format!": %.1f "(sp.biomass.get()));
 			if (sp.status != "") { b.b(sp.status); }
 			b.br();
@@ -151,7 +151,7 @@ class GameState : State {
 			}
 			Component slotted = new Component(window, "default");
 
-			auto info = START_SPECIES[selectedSpecies];
+			auto info = SpeciesMap.ALL_SPECIES.get(selectedSpecies);
 			ImageComponent img = new ImageComponent(window);
 			img.setRelative(0, 0, 0, 0, 512, 384, LayoutRule.BEGIN, LayoutRule.CENTER);
 			img.img = speciesRenderer.getSpeciesRenderData(selectedSpecies).icon;
@@ -232,7 +232,7 @@ class GameState : State {
 		speciesGroup = new RadioGroup!int();
 		
 		RenderSpecies speciesRenderer = new RenderSpecies(window);
-		foreach(i, sp; START_SPECIES) {
+		foreach(i; 0 .. START_SPECIES_NUM) {
 			Button btn = new Button(window);
 			btn.setRelative(xco, yco, 0, 0, 36, 36, LayoutRule.BEGIN, LayoutRule.BEGIN);
 			btn.icon = speciesRenderer.getSpeciesRenderData(to!int(i)).icon;
@@ -247,7 +247,7 @@ class GameState : State {
 				speciesInfoElement.setFragments([]);
 				return;
 			}
-			auto info = START_SPECIES[selectedSpecies];
+			auto info = SpeciesMap.ALL_SPECIES.get(selectedSpecies);
 			auto rtb = new RichTextBuilder()
 				.lines(format("Temperature range: %.0f °K - %.0f °K\nAlbedo: %.2f", 
 					info.temperatureRange[0], info.temperatureRange[1], info.albedo)).br()

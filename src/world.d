@@ -14,7 +14,7 @@ import mesh;
 import helix.color;
 import helix.allegro.shader;
 import renderSpecies;
-import startSpecies;
+import species;
 import sphereGrid;
 import helix.signal;
 import util3d;
@@ -340,7 +340,7 @@ class World : Component {
 
 			al_compose_transform(&t, &cameraTransform); // compose with camera transform
 
-			renderSpecies.renderSprites(START_SPECIES, sprites, planet.mesh, t, counter, cameraControl.camera.zoom);
+			renderSpecies.renderSprites(sprites, planet.mesh, t, counter, cameraControl.camera.zoom);
 		}
 
 		al_reset_clipping_rectangle();

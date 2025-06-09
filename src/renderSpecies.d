@@ -4,7 +4,6 @@ import helix.mainloop;
 import helix.allegro.shader;
 import core.internal.container.common;
 import helix.allegro.bitmap;
-import startSpecies;
 import allegro5.allegro;
 import allegro5.allegro_color;
 import helix.util.vec;
@@ -14,6 +13,7 @@ import util3d;
 import giftwrap;
 import allegro5.allegro_primitives;
 import helix.color;
+import species;
 
 alias Face = int[3];
 
@@ -37,7 +37,7 @@ class RenderSpecies {
 	SpeciesRenderData getSpeciesRenderData(int species) {
 		if (species !in speciesRenderCache) {
 			SpeciesRenderData data;
-			SpeciesInfo speciesInfo = START_SPECIES[species];
+			SpeciesInfo speciesInfo = SpeciesMap.ALL_SPECIES.get(species);
 			data.icon = renderSingleSpecies(species, 40, 32);
 			data.color1 = al_color_hsv(speciesInfo.hue1, 0.5, 1.0);
 			data.color2 = al_color_hsv(speciesInfo.hue2, 0.5, 1.0);
@@ -58,7 +58,7 @@ class RenderSpecies {
 	void renderSpecies(int speciesId, int x, int y, double scale, int timer) {
 		int delta = (timer % 60 < 30) ? 8 : 0;
 
-		SpeciesInfo species = START_SPECIES[speciesId];
+		SpeciesInfo species = SpeciesMap.ALL_SPECIES.get(speciesId);
 		// TODO: Can't cache hsv mapped values yet -> leads to recursive call of renderSpecies!
 		ALLEGRO_COLOR color1 = al_color_hsv(species.hue1, 0.5, 1.0);
 		ALLEGRO_COLOR color2 = al_color_hsv(species.hue2, 0.5, 1.0);
@@ -95,7 +95,7 @@ class RenderSpecies {
 		return bmp;
 	}
 
-	void renderSprites(in SpeciesInfo[] species, Sprite[] sprites, ref Mesh mesh, ref ALLEGRO_TRANSFORM transform, int timer, double zoom) {
+	void renderSprites(Sprite[] sprites, ref Mesh mesh, ref ALLEGRO_TRANSFORM transform, int timer, double zoom) {
 		startRender();
 
 		// apply camera transform to face
@@ -145,12 +145,13 @@ class RenderSpecies {
 				center + (tangent * halfSize) - (bitangent * halfSize),
 			];
 
+			auto speciesInfo = SpeciesMap.ALL_SPECIES.get(sprite.speciesId);
 			int delta = (timer % 60 < 30) ? 8 : 0;
 			int[4] index = [
-				species[sprite.speciesId].layers[0] + delta,
-				species[sprite.speciesId].layers[1] + delta,
-				species[sprite.speciesId].layers[2] + delta,
-				species[sprite.speciesId].layers[3] + delta,
+				speciesInfo.layers[0] + delta,
+				speciesInfo.layers[1] + delta,
+				speciesInfo.layers[2] + delta,
+				speciesInfo.layers[3] + delta,
 			];
 
 			// What do you mean, use a loop?
@@ -187,8 +188,8 @@ class RenderSpecies {
 			];
 			
 			// TODO: cache hsv mapped values
-			ALLEGRO_COLOR color1 = al_color_hsv(species[sprite.speciesId].hue1, 0.5, 1.0);
-			ALLEGRO_COLOR color2 = al_color_hsv(species[sprite.speciesId].hue2, 0.5, 1.0);
+			ALLEGRO_COLOR color1 = al_color_hsv(speciesInfo.hue1, 0.5, 1.0);
+			ALLEGRO_COLOR color2 = al_color_hsv(speciesInfo.hue2, 0.5, 1.0);
 
 			// // TODO: add function setter.withColor
 			setter.withVec3f("red_replacement", vec!(3, float)(color1.r, color1.g, color1.b));

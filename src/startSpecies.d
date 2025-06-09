@@ -1,59 +1,7 @@
 module startSpecies;
 
 import std.random;
-
-enum ROLE {
-	REDUCER =  0, // metabolises dead biomass using oxygen
-	PRODUCER = 1, // grows from h2o and co2
-	CONSUMER = 2, // metabolises living species that it can eat using oxygen
-};
-
-enum INTERACTION {
-	EAT = 0,
-	NEUTRAL = 1, 
-	PARASITE = 2, 
-	SYMBIOSIS = 3
-};
-
-/*
-
- 
-	one of ROLE.PRODUCER, ROLE.CONSUMER, ROLE.REDUCER
-
-// interactionMap: 
-
-	for each other species, define how they interact
-	1: EAT will mean that this species will eat species 1.
-	being carnivore / omnivore / herbivore is implicit
-	the role takes precedence. So a ROLE.PRODUCER will never EAT another species, no matter what"s defined in the interactionMap
-	B: PARASITE -> current species reduces fitness of B without eating it. For plants, you could imagine that it"s somehow poisonous
-	B: SYMBIOSIS -> current speices increases fitness of B just by being in the same location 
-					(to be true symbiosis, the same needs to be defined in reverse on the other species)
-	B: NEUTRAL -> should be most common. Live side-by-side Neutral is the DEFAULT
-
-biotopeTolerances: 
-	
-	fitness for each biotope 0..7, as a factor between 0.0 and 1.0. Default: 0.5
-
-*/
-
-struct SpeciesInfo {
-	string name;	
-	int tileIdx;
-	uint color;
-	ROLE role;
-	INTERACTION[long] interactionMap;
-	double albedo;
-	double[2] temperatureRange;
-	string backstory;
-	float[int] biotopeTolerances;
-
-	int[4] layers; // between 0 and 7.
-	int hue1; // between 0 and 360
-	int hue2;
-}
-
-SpeciesInfo[] START_SPECIES = null;
+import species;
 
 void initRandomLook(ref SpeciesInfo species) {
 	species.layers = [uniform(0, 8), uniform(0, 8), uniform(0, 8), uniform(0, 8)],
@@ -62,9 +10,9 @@ void initRandomLook(ref SpeciesInfo species) {
 	species.hue2 = uniform(0, 360);
 }
 
-void initStartSpecies() {
+SpeciesInfo[] initStartSpecies() {
 	// TODO better read from JSON perhaps?
-	START_SPECIES = [
+	SpeciesInfo[] START_SPECIES = [
 		SpeciesInfo( // 0
 			"Plant 0",
 			12,
@@ -217,10 +165,12 @@ A decomposer in temperate climates.`,
 	`DO NOT JOKE WITH THIS MICRO RED TERMINATOR!!!`,
 			[ 0: 0.1, 1: 0.1, 2: 0.2, 3: 1.0, 4: 0.8, 5: 0.9, 6: 0.9, 7: 0.1 ]
 		)
-
 	];
+	assert(START_SPECIES.length == START_SPECIES_NUM, "START_SPECIES array must have exactly START_SPECIES_NUM elements");
 
 	foreach (ref species; START_SPECIES) {
 		initRandomLook(species);
 	}
+
+	return START_SPECIES;
 }

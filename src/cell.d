@@ -1,7 +1,6 @@
 module cell;
 
 import constants;
-import startSpecies;
 import planet;
 import std.math;
 import std.algorithm;
@@ -145,7 +144,7 @@ Species: %s`,
 		// each species should grow and die based on local fitness.
 
 		foreach (ref sp; _species) {
-			const info = START_SPECIES[sp.speciesId];
+			const info = SpeciesMap.ALL_SPECIES.get(sp.speciesId);
 			sp.status = "";
 			
 			double fitness = 1.0;
@@ -369,7 +368,7 @@ Species: %s`,
 		albedoDebugStr = format(`%.2f * %.2f [ice] * %.2f [dryIce]`, ALBEDO_BASE, iceEffect, dryIceEffect);
 
 		foreach (ref sp; _species) {
-			const info = START_SPECIES[sp.speciesId];
+			const info = SpeciesMap.ALL_SPECIES.get(sp.speciesId);
 			const speciesEffect = mapAlbedoReduction(info.albedo, sp.biomass.get() / 500);
 			this.albedo *= speciesEffect;
 			albedoDebugStr ~= format(` * %g [%s] `, speciesEffect, sp.speciesId);

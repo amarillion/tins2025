@@ -157,7 +157,17 @@ class Sim {
 	}
 
 	void evolve() {
-
+		// pick a random cell, pick the top species, and evolve.
+		import std.random : uniform;
+		auto randomCell = grid.getCell(to!int(uniform(0, grid.size)));
+		if (randomCell.species.length == 0) return; // no species to evolve.
+		// pick the top species, and evolve it.
+		auto topSpecies = randomCell.species[0];
+		if (topSpecies.biomass.get() < 5.0) return; // not enough biomass to evolve.
+		// split off 1.0 units
+		auto newSpecies = SpeciesMap.ALL_SPECIES.mutate(topSpecies.speciesId);
+		randomCell.addSpecies(newSpecies, 1.0);
+		topSpecies.biomass -= 1.0;
 	}
 
 	void migrate() {
