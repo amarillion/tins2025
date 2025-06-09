@@ -68,7 +68,7 @@ RichTextBuilder biotope(RichTextBuilder b, MainLoop window, int biotope) {
 }
 
 RichTextBuilder species(RichTextBuilder b, MainLoop window, int sp) {
-	return b.img(window.resources.bitmaps[START_SPECIES[sp].iconUrl]);
+	return b.img(new RenderSpecies(window).getSpeciesRenderData(sp).icon);
 }
 
 	RichTextBuilder cellInfo(RichTextBuilder b, MainLoop window, Cell c) {
@@ -154,7 +154,7 @@ class GameState : State {
 			auto info = START_SPECIES[selectedSpecies];
 			ImageComponent img = new ImageComponent(window);
 			img.setRelative(0, 0, 0, 0, 512, 384, LayoutRule.BEGIN, LayoutRule.CENTER);
-			img.img = speciesRenderer.renderSingleSpecies(info);
+			img.img = speciesRenderer.getSpeciesRenderData(selectedSpecies).icon;
 
 			RichText rt1 = new RichText(window);
 			rt1.setRelative(528, 0, 0, 0, 0, 0, LayoutRule.STRETCH, LayoutRule.STRETCH);
@@ -231,10 +231,11 @@ class GameState : State {
 		int yco = 0;
 		speciesGroup = new RadioGroup!int();
 		
+		RenderSpecies speciesRenderer = new RenderSpecies(window);
 		foreach(i, sp; START_SPECIES) {
 			Button btn = new Button(window);
 			btn.setRelative(xco, yco, 0, 0, 36, 36, LayoutRule.BEGIN, LayoutRule.BEGIN);
-			btn.icon = window.resources.bitmaps[sp.iconUrl];
+			btn.icon = speciesRenderer.getSpeciesRenderData(to!int(i)).icon;
 			xco += 40;
 			parentElt.addChild(btn);
 			speciesGroup.addButton(btn, to!int(i));

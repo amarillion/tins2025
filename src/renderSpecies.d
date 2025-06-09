@@ -24,22 +24,42 @@ struct Sprite {
 	int localIdx;
 }
 
+struct SpeciesRenderData {
+	Bitmap icon;
+	ALLEGRO_COLOR color1;
+	ALLEGRO_COLOR color2;
+}
+
 class RenderSpecies {
+
+	static SpeciesRenderData[int] speciesRenderCache;
+
+	SpeciesRenderData getSpeciesRenderData(int species) {
+		if (species !in speciesRenderCache) {
+			SpeciesRenderData data;
+			SpeciesInfo speciesInfo = START_SPECIES[species];
+			data.icon = renderSingleSpecies(species, 40, 32);
+			data.color1 = al_color_hsv(speciesInfo.hue1, 0.5, 1.0);
+			data.color2 = al_color_hsv(speciesInfo.hue2, 0.5, 1.0);
+			speciesRenderCache[species] = data;
+		}
+		return speciesRenderCache[species];
+	}
 
 	this(MainLoop window) {
 		speciesTexture = window.resources.bitmaps["Bacteria"];
 		shader = shader.ofFragment(window.resources.shaders["color-replace"]);
-
 	}
 
 	void startRender() {
 		setter = shader.use(true);
 	}
 	
-	void renderSpecies(in SpeciesInfo species, int x, int y, double scale, int timer) {
+	void renderSpecies(int speciesId, int x, int y, double scale, int timer) {
 		int delta = (timer % 60 < 30) ? 8 : 0;
-		
-		// TODO: cache hsv mapped values
+
+		SpeciesInfo species = START_SPECIES[speciesId];
+		// TODO: Can't cache hsv mapped values yet -> leads to recursive call of renderSpecies!
 		ALLEGRO_COLOR color1 = al_color_hsv(species.hue1, 0.5, 1.0);
 		ALLEGRO_COLOR color2 = al_color_hsv(species.hue2, 0.5, 1.0);
 
@@ -62,12 +82,14 @@ class RenderSpecies {
 	Shader shader;
 	Shader.UniformSetter setter;
 
-	Bitmap renderSingleSpecies(ref SpeciesInfo species) {
-		Bitmap bmp = Bitmap.create(64, 64);
+	Bitmap renderSingleSpecies(int speciesId, int scale = 64, int size = 64) {
+		assert(size > 0);
+		Bitmap bmp = Bitmap.create(size, size);
 		ALLEGRO_BITMAP *current = al_get_target_bitmap();
 		al_set_target_bitmap(bmp.ptr);
 		startRender();
-		renderSpecies(species, 0, 0, 1.0, 0);
+		int offset = (size - scale) / 2;
+		renderSpecies(speciesId, offset, offset, to!float(scale) / 64.0, 0);
 		endRender();
 		al_set_target_bitmap(current);
 		return bmp;

@@ -298,21 +298,6 @@ class World : Component {
 		});
 	}
 
-	void renderAllSpecies() {
-		renderSpecies.startRender();
-		for (int i = 0; i < START_SPECIES.length; i++) {
-			int x = (i % 48) * 32 + 10;
-			int y = (i / 48) * 32 + 10;
-			renderSpecies.renderSpecies(
-				START_SPECIES[i], 
-				x, y, 
-				0.5, // scale
-				counter // timer
-			);
-		}
-		renderSpecies.endRender();
-	}
-
 	final void initResources() {
 		texture = window.resources.bitmaps["biotope"];
 		speciesTexture = window.resources.bitmaps["Bacteria"];
@@ -358,7 +343,6 @@ class World : Component {
 			renderSpecies.renderSprites(START_SPECIES, sprites, planet.mesh, t, counter, cameraControl.camera.zoom);
 		}
 
-		// this.renderAllSpecies();
 		al_reset_clipping_rectangle();
 	}
 

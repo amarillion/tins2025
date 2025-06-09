@@ -46,7 +46,6 @@ void main(string[] args)
 		mainloop.resources.addGlob("data/*.png");
 
 		mainloop.resources.addGlob("data/biotope/*.png");
-		mainloop.resources.addGlob("data/species/*.png");
 		mainloop.resources.addMusicFile("data/PlanetaryGrowth_loop_nopianosawchord.ogg");
 
 		mainloop.styles.applyResource("style");
