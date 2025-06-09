@@ -96,7 +96,25 @@ class RenderSpecies {
 			vec3f tangent = (vertBuf[face[0]] - vertBuf[face[1]]).normalize();
 			vec3f bitangent = normal.crossProductVector(tangent).normalize();
 
-			float halfSize = zoom * 16.0; // size in pixels?
+			vec2f[] scatter = [
+				vec2f(0.0, 0.0),
+				vec2f(1.0, 0.0),
+				vec2f(0.0, 1.0),
+				vec2f(-1.0, 0.0),
+				vec2f(0.0, -1.0),
+				vec2f(0.7, 0.7),
+				vec2f(-0.7, 0.7),
+				vec2f(0.7, -0.7),
+				vec2f(-0.7, -0.7),
+			]; 
+
+			// move center by scatter factor
+			center += (vec3f(
+				scatter[sprite.localIdx % scatter.length].x, 
+				scatter[sprite.localIdx % scatter.length].y, 0.0) * (20.0 * zoom));
+
+			// subsequent sprites are scaled down a bit more 
+			float halfSize = zoom * (8 - sprite.localIdx);
 
 			vec3f[] spriteVerts = [
 				center + (tangent * halfSize) + (bitangent * halfSize),
