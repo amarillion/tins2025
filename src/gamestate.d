@@ -334,17 +334,21 @@ class GameState : State {
 								
 				double change = sp.biomass.changeRatio();
 				int tile2 = -1;
+				int changeRate = 0;
 				if (change < 0.98) {
 					tile2 = change < 0.96 ? 19: 18;
+					changeRate = change < 0.96 ? -2: -1;
 				}
 				else if (change > 1.02) {
 					tile2 = change > 1.04 ? 17: 16;
+					changeRate = change > 1.04 ? 2: 1;
 				}
 				
 				world.sprites ~= Sprite(
 					faceId: cell.id,
 					speciesId: sp.speciesId,
 					changeTile: tile2,
+					changeRate: changeRate,
 					localIdx: i
 				);
 			}

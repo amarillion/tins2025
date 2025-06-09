@@ -20,8 +20,9 @@ alias Face = int[3];
 struct Sprite {
 	int faceId;
 	int speciesId;
-	int changeTile;
 	int localIdx;
+	int changeTile;
+	int changeRate; // between -2 and 2
 }
 
 struct SpeciesRenderData {
@@ -146,7 +147,9 @@ class RenderSpecies {
 			];
 
 			auto speciesInfo = SpeciesMap.ALL_SPECIES.get(sprite.speciesId);
-			int delta = (timer % 60 < 30) ? 8 : 0;
+			int counter = timer + faceId + sprite.localIdx;
+			counter *= sprite.changeRate + 2; // changeRate is between -2 and 2, so we add 5 to get a positive value
+			int delta = (counter % 120 < 60) ? 8 : 0;
 			int[4] index = [
 				speciesInfo.layers[0] + delta,
 				speciesInfo.layers[1] + delta,
